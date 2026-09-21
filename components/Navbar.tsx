@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
-/*  Tipografías (para cambiarlas, edita solo estas dos líneas)         */
+/*  Tipografías (para cambiarlas, edita solo estas dos líneas)        */
 /*  - Nunito: redondeada y amable, como las letras del logo            */
 /*  - Dancing Script: manuscrita, como el lema del logo                */
 /* ------------------------------------------------------------------ */
@@ -41,18 +41,16 @@ const PHONE_HREF = 'tel:+56966467641';
 const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 
 /* ------------------------------------------------------------------ */
-/*  Datos de navegación                                                */
+/*  Datos de navegación (Añadido el campo 'id' para TypeScript)        */
 /* ------------------------------------------------------------------ */
 const navLinks = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Equipo', href: '/equipo' }, // <-- CAMBIO AQUÍ: Ahora dirige a la página nueva
-    { name: 'Nosotros', href: '/nosotros' },
-    { name: 'Especialidades', href: '/especialidades', hasDropdown: true },
-    { name: 'Convenios', href: '/convenios' },
-  ];
+  { name: 'Inicio', href: '/', id: 'inicio' },
+  { name: 'Equipo', href: '/equipo', id: 'equipo' },
+  { name: 'Nosotros', href: '/nosotros', id: 'nosotros' },
+  { name: 'Especialidades', href: '/especialidades', hasDropdown: true, id: 'especialidades' },
+  { name: 'Convenios', href: '/convenios', id: 'convenios' },
+];
 
-// Ajusta nombres, descripciones y rutas a las especialidades reales de la clínica.
-// Los colores son versiones más claras de los del logo para que se lean bien sobre azul oscuro.
 const especialidades = [
   { name: 'Ortodoncia', desc: 'Brackets y alineadores', icon: Smile, color: '#22B3CF', href: '/especialidades/ortodoncia' },
   { name: 'Implantología', desc: 'Recupera piezas perdidas', icon: ShieldCheck, color: '#FDB92B', href: '/especialidades/implantologia' },
@@ -69,7 +67,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSpecOpen, setMobileSpecOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [hovered, setHovered] = useState(null);
+  
+  // SOLUCIÓN: Definimos explícitamente que hovered puede ser string o null
+  const [hovered, setHovered] = useState<string | null>(null);
+  
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('inicio');
 
@@ -89,7 +90,9 @@ export default function Navbar() {
     const sections = navLinks
       .filter((l) => l.id !== 'inicio')
       .map((l) => document.getElementById(l.id))
-      .filter(Boolean);
+      // SOLUCIÓN: Le decimos a TypeScript que filtramos los nulos y solo dejamos HTMLElements
+      .filter((s): s is HTMLElement => s !== null); 
+      
     if (!sections.length) return;
 
     const observer = new IntersectionObserver(
@@ -108,7 +111,9 @@ export default function Navbar() {
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     const mq = window.matchMedia('(min-width: 1280px)');
-    const onChange = (e) => e.matches && setMobileOpen(false);
+    
+    // SOLUCIÓN: Tipado estricto del evento
+    const onChange = (e: MediaQueryListEvent) => e.matches && setMobileOpen(false);
     mq.addEventListener('change', onChange);
     return () => {
       document.body.style.overflow = '';
@@ -244,7 +249,7 @@ export default function Navbar() {
                   onMouseLeave={() => setDropdownOpen(false)}
                   onFocus={() => setDropdownOpen(true)}
                   onBlur={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget)) setDropdownOpen(false);
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropdownOpen(false);
                   }}
                   onKeyDown={(e) => e.key === 'Escape' && setDropdownOpen(false)}
                 >
