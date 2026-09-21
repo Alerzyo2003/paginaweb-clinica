@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
-import { Nunito, Dancing_Script } from 'next/font/google';
+import { AnimatePresence, MotionConfig, motion, Variants } from 'framer-motion';import { Nunito, Dancing_Script } from 'next/font/google';
 import {
   ArrowRight,
   Baby,
