@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { AnimatePresence, MotionConfig, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
@@ -22,7 +21,6 @@ import type { LucideIcon } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Tokens de marca (mismos de la home y el Navbar).                   */
-/*  Ideal: moverlos a src/lib/brand.ts e importarlos en los tres.      */
 /* ------------------------------------------------------------------ */
 const mainFont = Nunito({ subsets: ['latin'], display: 'swap' });
 const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
@@ -38,6 +36,7 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
+const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 
 const focusDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
@@ -46,11 +45,6 @@ const focusLight =
 
 /* ------------------------------------------------------------------ */
 /*  Áreas y equipo                                                     */
-/*                                                                     */
-/*  FOTOS: deja los archivos en /public/equipo/ con el mismo nombre    */
-/*  del campo `foto`. Recorte recomendado: vertical 4:5 (ej. 800x1000) */
-/*  con la cara en el tercio superior. Si falta la foto, la tarjeta    */
-/*  muestra el monograma y no se rompe el diseño.                      */
 /* ------------------------------------------------------------------ */
 type AreaId = 'cirugia' | 'ortodoncia' | 'endodoncia' | 'rehabilitacion' | 'general' | 'podologia';
 
@@ -260,8 +254,6 @@ function BrandBar({ className = '' }: { className?: string }) {
 
 /* ------------------------------------------------------------------ */
 /*  Efectos de tarjeta — Spotlight + Tilt                             */
-/*  Inspirados en patrones de React Bits / Animate UI y ejecutados    */
-/*  sobre el mismo motor Motion que ya utiliza esta página.           */
 /* ------------------------------------------------------------------ */
 function SpotlightCard({
   children,
@@ -300,7 +292,6 @@ function SpotlightCard({
         '--spot-y': '35%',
       } as React.CSSProperties}
     >
-      {/* Spotlight tipo React Bits: luz limpia, sin capa gris. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -357,7 +348,8 @@ function TiltSurface({ children }: { children: React.ReactNode }) {
 function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
   const area = AREAS[m.area];
   const Icon = area.icon;
-  const href = `/#agenda?especialista=${slugify(m.nombre)}`;
+  // Agregamos el especialista como parámetro en la URL de reserva para que el portal lo lea
+  const href = `${AGENDA_HREF}?especialista=${slugify(m.nombre)}`;
 
   return (
     <motion.li
@@ -495,8 +487,10 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 380, damping: 24 }}
             >
-              <Link
+              <a
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`group/btn flex items-center justify-center gap-2 rounded-full border-2 border-[#071B3A] py-3 text-[14px] font-extrabold text-[#071B3A] transition-colors duration-200 hover:border-[#FDB92B] hover:bg-[#FDB92B] ${focusLight}`}
               >
                 <motion.span whileHover={{ rotate: -8 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
@@ -511,7 +505,7 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
                 >
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </motion.span>
-              </Link>
+              </a>
             </motion.div>
             <span className="sr-only">con {m.nombre}</span>
           </div>
@@ -718,8 +712,10 @@ export default function Equipo() {
                   costo.
                 </p>
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="mt-8 w-fit">
-                  <Link
-                    href="/#agenda"
+                  <a
+                    href={AGENDA_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`group flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-extrabold text-[#071B3A] shadow-[0_10px_30px_-8px_rgba(253,185,43,0.7)] transition-colors hover:bg-[#FFC94F] ${focusDark}`}
                     style={{ backgroundColor: AMBER }}
                   >
@@ -729,7 +725,7 @@ export default function Equipo() {
                       className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1"
                       aria-hidden="true"
                     />
-                  </Link>
+                  </a>
                 </motion.div>
               </motion.div>
 
