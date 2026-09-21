@@ -29,7 +29,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 /* ------------------------------------------------------------------ */
-/*  Tokens de marca (mismos de la home, el Navbar y /equipo).          */
+/*  Tokens de marca (mismos de la home, el Navbar y /equipo).         */
 /*  Ideal: moverlos a src/lib/brand.ts e importarlos en todas.         */
 /* ------------------------------------------------------------------ */
 const mainFont = Nunito({ subsets: ['latin'], display: 'swap' });
@@ -51,8 +51,7 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 const PHONE_LABEL = '+56 9 9446 4662';
 const PHONE_HREF = 'tel:+56994464662';
 const WHATSAPP_HREF = 'https://wa.me/56994464662';
-const AGENDA_HREF =
-  'https://d531f286059606eb615a04840514483424142e3e.agenda.softwaredentalink.com/agenda?modalidad=1';
+const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 const TMC_HREF = 'https://tmc.dideco.cl/services/dignidad-centro-medico-y-dental/';
 
 const focusDark =
@@ -61,7 +60,7 @@ const focusLight =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#071B3A] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
 
 /* ------------------------------------------------------------------ */
-/*  Contenido                                                          */
+/*  Contenido                                                         */
 /* ------------------------------------------------------------------ */
 const cifras: { valor: string; label: string; color: string; icon: LucideIcon }[] = [
   { valor: '$0', label: 'Evaluación integral', color: AMBER, icon: CalendarCheck },
@@ -214,7 +213,7 @@ const faqs: { q: string; a: ReactNode }[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Piezas reutilizables                                               */
+/*  Piezas reutilizables                                              */
 /* ------------------------------------------------------------------ */
 function BrandBar({ className = '' }: { className?: string }) {
   return (
