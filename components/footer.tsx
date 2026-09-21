@@ -53,13 +53,13 @@ export default function Footer() {
             <h3 className="text-[17px] font-black text-[#0f2950] mb-4">Clínica Dignidad</h3>
             <ul className="space-y-3">
               {[
-                { label: "Equipo", icon: <UsersIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Conócenos", icon: <ToothIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Especialidades", icon: <ShieldIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Trabaja con Nosotros", icon: <BriefcaseIcon className="w-5 h-5 text-blue-500" /> }
+                { label: "Equipo", href: "/equipo", icon: <UsersIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Conócenos", href: "/nosotros", icon: <ToothIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Especialidades", href: "/especialidades", icon: <ShieldIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Trabaja con Nosotros", href: "/trabaja-con-nosotros", icon: <BriefcaseIcon className="w-5 h-5 text-blue-500" /> }
               ].map((item, i) => (
                 <li key={i}>
-                  <Link href="#" className="flex items-center gap-2.5 group">
+                  <Link href={item.href} className="flex items-center gap-2.5 group">
                     <div className="flex-shrink-0 transition-transform group-hover:scale-110">
                       {item.icon}
                     </div>
@@ -77,13 +77,18 @@ export default function Footer() {
             <h3 className="text-[17px] font-black text-[#0f2950] mb-4">Te Ayudamos</h3>
             <ul className="space-y-3">
               {[
-                { label: "Contacto", icon: <ChatIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Convenios", icon: <HandshakeIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Agendar Hora", icon: <CalendarIcon className="w-5 h-5 text-blue-500" /> },
-                { label: "Sugerencias, Reclamos\ny Felicitaciones", icon: <DocumentIcon className="w-5 h-5 text-blue-500" /> }
+                { label: "Contacto", href: "/contacto", isExternal: false, icon: <ChatIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Convenios", href: "/convenios", isExternal: false, icon: <HandshakeIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Agendar Hora", href: "https://confirmar-cita-dignidad.vercel.app/agendar", isExternal: true, icon: <CalendarIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Sugerencias, Reclamos\ny Felicitaciones", href: "/reclamos", isExternal: false, icon: <DocumentIcon className="w-5 h-5 text-blue-500" /> }
               ].map((item, i) => (
                 <li key={i}>
-                  <Link href="#" className="flex items-start gap-2.5 group">
+                  <Link 
+                    href={item.href} 
+                    target={item.isExternal ? "_blank" : undefined}
+                    rel={item.isExternal ? "noopener noreferrer" : undefined}
+                    className="flex items-start gap-2.5 group"
+                  >
                     <div className="flex-shrink-0 mt-0.5 transition-transform group-hover:scale-110">
                       {item.icon}
                     </div>
@@ -127,10 +132,10 @@ export default function Footer() {
               <span className="text-[#0f2950] font-bold text-[13px]">Redes Sociales</span>
               <div className="w-px h-5 bg-slate-300"></div>
               <div className="flex items-center gap-2">
-                <a href="#" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><FacebookIcon /></a>
-                <a href="#" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><InstagramIcon /></a>
-                <a href="#" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><LinkedinIcon /></a>
-                <a href="#" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><TwitterIcon /></a>
+                <a href="https://facebook.com/clinicadignidad" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><FacebookIcon /></a>
+                <a href="https://instagram.com/clinicadignidad" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><InstagramIcon /></a>
+                <a href="https://linkedin.com/company/clinicadignidad" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><LinkedinIcon /></a>
+                <a href="https://twitter.com/clinicadignidad" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="w-7 h-7 rounded-full bg-[#1d4ed8] text-white flex items-center justify-center hover:bg-blue-800 transition-colors"><TwitterIcon /></a>
               </div>
             </div>
           </div>
@@ -144,11 +149,11 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-3 text-[12px] font-medium text-[#475569]">
-            <Link href="#" className="hover:text-blue-600">Términos y Condiciones</Link>
+            <Link href="/terminos-y-condiciones" className="hover:text-blue-600">Términos y Condiciones</Link>
             <span className="text-blue-200">|</span>
-            <Link href="#" className="hover:text-blue-600">Política de Privacidad</Link>
+            <Link href="/politica-de-privacidad" className="hover:text-blue-600">Política de Privacidad</Link>
             <span className="text-blue-200">|</span>
-            <Link href="#" className="hover:text-blue-600">Canal de Denuncias</Link>
+            <Link href="/canal-de-denuncias" className="hover:text-blue-600">Canal de Denuncias</Link>
           </div>
 
           <div className="flex flex-col items-center lg:items-end">
