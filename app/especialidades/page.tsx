@@ -138,16 +138,16 @@ const beneficios = [
   },
 ];
 
-const reveal = {
+const reveal: Variants = {
   hidden: { opacity: 0, y: 32, filter: 'blur(7px)' },
-  show: (i = 0) => ({
+  show: (i: number = 0) => ({
     opacity: 1,
     y: 0,
     filter: 'blur(0px)',
     transition: {
       duration: 0.72,
       delay: i * 0.07,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const, // <-- 'as const' soluciona el problema de tipado
     },
   }),
 };

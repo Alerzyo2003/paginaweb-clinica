@@ -29,9 +29,9 @@ const MAGENTA = '#B01C48';
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
+const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 
 const focusLight = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#071B3A] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
-
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -112,14 +112,16 @@ export default function RehabilitacionOralPage() {
               Devolvemos la armonía, la fuerza de masticación y la estética completa a tu boca mediante tratamientos protésicos e integrales avanzados.
             </motion.p>
             <motion.div variants={revealUp} custom={3} className="mt-8 flex flex-wrap items-center gap-4">
-              <Link
-                href="/#agenda"
+              <a
+                href={AGENDA_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-extrabold text-[#071B3A] shadow-lg transition-colors hover:bg-[#FFC94F] ${focusLight}`}
                 style={{ backgroundColor: AMBER }}
               >
                 <CalendarCheck className="h-5 w-5" />
                 Agendar evaluación
-              </Link>
+              </a>
               <Link
                 href="/equipo"
                 className="flex items-center gap-2 rounded-full border-2 border-white/20 px-8 py-4 text-[15px] font-bold text-white transition-colors hover:bg-white/10"
@@ -373,7 +375,7 @@ export default function RehabilitacionOralPage() {
               <p className="text-sm font-bold text-slate-500">Reserva directa</p>
               <a
                 href={PHONE_HREF}
-                className={`mt-1 block rounded text-3xl font-black tracking-tight text-[#071B3A] hover:text-[#B01C48] md:text-4xl ${focusLight}`}
+                className={`mt-1 block rounded text-3xl font-black tracking-tight text-[#071B3A] hover:text-[#0A9BB8] md:text-4xl ${focusLight}`}
               >
                 {PHONE_LABEL}
               </a>
