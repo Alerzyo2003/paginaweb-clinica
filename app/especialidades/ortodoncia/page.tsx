@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MotionConfig, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { MotionConfig, motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import type { PointerEvent } from 'react';
 import { 
@@ -29,9 +29,21 @@ const MAGENTA = '#B01C48';
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
-const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 
 const focusLight = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#071B3A] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
+
+// Barra de progreso de scroll (misma pieza usada en /nosotros, para consistencia entre páginas).
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 22, restDelta: 0.001 });
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ scaleX, background: `linear-gradient(90deg, ${TEAL}, ${AMBER}, ${MAGENTA})` }}
+      className="fixed left-0 top-0 z-[60] h-[3px] w-full origin-left"
+    />
+  );
+}
 
 export default function OrtodonciaPage() {
   const heroRotateX = useMotionValue(0);
@@ -68,10 +80,12 @@ export default function OrtodonciaPage() {
     }),
   };
 
+  // El tercer beneficio pasa de NAVY (se confundía con el texto) a MAGENTA,
+  // así los tres usan un color de marca distinto entre sí (teal / amber / magenta).
   const benefits = [
     { title: 'Estética y Confianza', desc: 'Logra la sonrisa que siempre has querido, mejorando tu autoestima y seguridad al hablar o sonreír.', icon: Smile, color: TEAL },
     { title: 'Salud Dental', desc: 'Los dientes alineados son más fáciles de limpiar, reduciendo drásticamente el riesgo de caries y sarro.', icon: ShieldCheck, color: AMBER },
-    { title: 'Función Masticatoria', desc: 'Corrige problemas de mordida, previniendo el desgaste prematuro de los dientes y dolores articulares.', icon: CheckCircle2, color: NAVY },
+    { title: 'Función Masticatoria', desc: 'Corrige problemas de mordida, previniendo el desgaste prematuro de los dientes y dolores articulares.', icon: CheckCircle2, color: MAGENTA },
   ];
 
   const treatments = [
@@ -100,6 +114,7 @@ export default function OrtodonciaPage() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <ScrollProgress />
       <main className={`${mainFont.className} flex min-h-screen flex-col overflow-x-hidden bg-white`}>
         {/* ================= HERO ================= */}
         <section className="relative isolate overflow-hidden bg-[#071B3A] text-white">
@@ -176,17 +191,15 @@ export default function OrtodonciaPage() {
                 className="mt-8 flex flex-wrap items-center gap-4"
               >
                 <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <a
-                    href={AGENDA_HREF}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/#agenda"
                     className={`group flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-extrabold text-[#071B3A] shadow-lg transition-colors hover:bg-[#FFC94F] ${focusLight}`}
                     style={{ backgroundColor: AMBER }}
                   >
                     <CalendarCheck className="h-5 w-5 transition-transform duration-300 group-hover:rotate-[-8deg]" />
                     Agendar evaluación
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </a>
+                  </Link>
                 </motion.div>
 
                 <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }}>
@@ -357,11 +370,19 @@ export default function OrtodonciaPage() {
                   }`}
                 >
                   {item.featured && (
-                    <motion.div
-                      animate={{ x: ['-130%', '130%'] }}
-                      transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 2.5, ease: 'easeInOut' }}
-                      className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/4 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                    />
+                    <>
+                      <motion.div
+                        animate={{ x: ['-130%', '130%'] }}
+                        transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 2.5, ease: 'easeInOut' }}
+                        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/4 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                      />
+                      <motion.div
+                        aria-hidden="true"
+                        animate={{ boxShadow: ['0 0 0 0 rgba(253,185,43,0.35)', '0 0 0 10px rgba(253,185,43,0)'] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+                        className="pointer-events-none absolute inset-0 rounded-[2rem]"
+                      />
+                    </>
                   )}
 
                   {item.featured && (
