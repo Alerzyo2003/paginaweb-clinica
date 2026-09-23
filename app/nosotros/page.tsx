@@ -1,9 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import {
+  AnimatePresence,
+  MotionConfig,
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
   ArrowRight,
@@ -59,6 +69,8 @@ const focusDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
 const focusLight =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#071B3A] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 /* ------------------------------------------------------------------ */
 /*  Contenido                                                          */
@@ -168,11 +180,7 @@ const faqs: { q: string; a: ReactNode }[] = [
   },
   {
     q: '¿Atienden por Fonasa?',
-    a: (
-      <>
-        Sí. Somos prestadores Fonasa Nivel 1 y atendemos por Fonasa exclusivamente tratamiento de conducto.
-      </>
-    ),
+    a: <>Sí. Somos prestadores Fonasa Nivel 1 y atendemos por Fonasa exclusivamente tratamiento de conducto.</>,
   },
   {
     q: '¿Cómo puedo agendar una hora?',
@@ -214,32 +222,112 @@ const faqs: { q: string; a: ReactNode }[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Piezas reutilizables                                               */
+/*  Piezas reutilizables + animación                                   */
 /* ------------------------------------------------------------------ */
+
+// Barra de progreso de scroll, con los colores de marca (BRAND_BAR).
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 22, restDelta: 0.001 });
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ scaleX, background: `linear-gradient(90deg, ${GREEN}, ${TEAL}, ${AMBER}, ${MAGENTA})` }}
+      className="fixed left-0 top-0 z-[60] h-[3px] w-full origin-left"
+    />
+  );
+}
+
+// Palabra por palabra, para el titular del hero (un único lugar "audaz" de la página).
+function AnimatedWords({ text, className = '' }: { text: string; className?: string }) {
+  const words = text.split(' ');
+  return (
+    <span className={className}>
+      {words.map((w, i) => (
+        <motion.span
+          key={`${w}-${i}`}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.35 + 0.045 * i, ease: EASE }}
+          className="inline-block"
+        >
+          {w}&nbsp;
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+// Cifra que cuenta hacia arriba cuando entra en pantalla (conserva prefijo/sufijo: $, +, %).
+function AnimatedStat({ valor }: { valor: string }) {
+  const match = valor.match(/^([^\d]*)(\d+)(.*)$/);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const [display, setDisplay] = useState(0);
+  const mv = useMotionValue(0);
+
+  useEffect(() => {
+    if (!inView || !match) return;
+    const target = parseInt(match[2], 10);
+    const controls = animate(mv, target, {
+      duration: 1.1,
+      ease: EASE,
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, match, mv]);
+
+  if (!match) return <span ref={ref}>{valor}</span>;
+  return (
+    <span ref={ref}>
+      {match[1]}
+      {display}
+      {match[3]}
+    </span>
+  );
+}
+
 function BrandBar({ className = '' }: { className?: string }) {
   return (
-    <div className={`flex h-[3px] w-full ${className}`} aria-hidden="true">
+    <motion.div
+      className={`flex h-[3px] w-full origin-left ${className}`}
+      aria-hidden="true"
+      initial={{ scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.9, ease: EASE }}
+    >
       {BRAND_BAR.map((c) => (
         <span key={c} className="flex-1" style={{ backgroundColor: c }} />
       ))}
-    </div>
+    </motion.div>
   );
 }
 
 function SectionHeader({ title, text, dark = false }: { title: string; text?: string; dark?: boolean }) {
   return (
     <div className="grid items-end gap-5 md:grid-cols-[1.2fr_1fr] md:gap-16">
-      <h2
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.6, ease: EASE }}
         className={`text-4xl font-black leading-[1.08] tracking-tight md:text-[50px] ${
           dark ? 'text-white' : 'text-[#071B3A]'
         }`}
       >
         {title}
-      </h2>
+      </motion.h2>
       {text && (
-        <p className={`max-w-md text-lg font-medium leading-relaxed ${dark ? 'text-slate-300' : 'text-slate-600'}`}>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
+          className={`max-w-md text-lg font-medium leading-relaxed ${dark ? 'text-slate-300' : 'text-slate-600'}`}
+        >
           {text}
-        </p>
+        </motion.p>
       )}
     </div>
   );
@@ -255,7 +343,7 @@ function AgendaLink({
   large?: boolean;
 }) {
   return (
-    <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className={className}>
+    <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.96 }} className={className}>
       <a
         href={AGENDA_HREF}
         target="_blank"
@@ -285,7 +373,11 @@ function FaqItem({
   onToggle: () => void;
 }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.45, delay: Math.min(index, 5) * 0.05, ease: EASE }}
       className={`overflow-hidden rounded-2xl border bg-white/90 backdrop-blur-md transition-[border-color,box-shadow] duration-300 ${
         open ? 'border-[#FDB92B] shadow-lg' : 'border-white/70 shadow-sm hover:border-slate-300'
       }`}
@@ -330,7 +422,7 @@ function FaqItem({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -339,8 +431,18 @@ const reveal = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, delay: Math.min(i, 4) * 0.09, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.55, delay: Math.min(i, 4) * 0.09, ease: EASE },
   }),
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+
+const pop = {
+  hidden: { opacity: 0, scale: 0.85, y: 8 },
+  show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
 };
 
 /* ------------------------------------------------------------------ */
@@ -351,13 +453,26 @@ export default function Nosotros() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <ScrollProgress />
       <main className={`${mainFont.className} flex min-h-screen flex-col overflow-x-hidden bg-white`}>
         {/* ================= PORTADA ================= */}
         <section className="relative isolate overflow-hidden bg-[#071B3A] text-white">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#0A9BB8]/25 blur-3xl" />
-            <div className="absolute -right-32 top-1/4 h-[420px] w-[420px] rounded-full bg-[#B01C48]/20 blur-3xl" />
-            <div className="absolute bottom-0 left-1/3 h-[320px] w-[320px] rounded-full bg-[#FDB92B]/10 blur-3xl" />
+            <motion.div
+              className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#0A9BB8]/25 blur-3xl"
+              animate={{ y: [0, -26, 0], x: [0, 16, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute -right-32 top-1/4 h-[420px] w-[420px] rounded-full bg-[#B01C48]/20 blur-3xl"
+              animate={{ y: [0, 22, 0], x: [0, -14, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+            />
+            <motion.div
+              className="absolute bottom-0 left-1/3 h-[320px] w-[320px] rounded-full bg-[#FDB92B]/10 blur-3xl"
+              animate={{ y: [0, -18, 0] }}
+              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            />
             <div
               className="absolute inset-0 opacity-[0.07]"
               style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '28px 28px' }}
@@ -365,23 +480,32 @@ export default function Nosotros() {
           </div>
 
           <div className="mx-auto max-w-[1320px] px-4 pb-32 pt-16 md:px-8 md:pb-36 md:pt-20">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="grid items-end gap-8 md:grid-cols-[1.15fr_1fr] md:gap-16"
-            >
+            <div className="grid items-end gap-8 md:grid-cols-[1.15fr_1fr] md:gap-16">
               <div>
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-1.5 text-[13px] font-bold text-[#FDB92B] backdrop-blur">
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                  className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-1.5 text-[13px] font-bold text-[#FDB92B] backdrop-blur"
+                >
+                  <motion.span
+                    animate={{ rotate: [0, 15, -10, 0] }}
+                    transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1.2, ease: EASE }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  </motion.span>
                   Sobre Clínica Dignidad
-                </span>
+                </motion.span>
                 <h1 className="mt-6 text-[40px] font-black leading-[1.08] tracking-tight md:text-5xl lg:text-[56px]">
-                  Cuidamos tu salud con calidad, cercanía y compromiso
+                  <AnimatedWords text="Cuidamos tu salud con calidad, cercanía y compromiso" />
                 </h1>
               </div>
 
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
+              >
                 <p className="max-w-md text-lg font-medium leading-relaxed text-slate-300">
                   Somos un centro médico y dental integral. Creemos que todas las personas merecen una atención de
                   primer nivel, con un enfoque humano y accesible.
@@ -395,7 +519,7 @@ export default function Nosotros() {
                       aria-hidden="true"
                     />
                   </AgendaLink>
-                  <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+                  <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.96 }} className="w-full sm:w-auto">
                     <Link
                       href="/equipo"
                       className={`flex items-center justify-center rounded-full border border-white/25 px-8 py-4 text-[15px] font-bold text-white transition-colors hover:border-white hover:bg-white/10 ${focusDark}`}
@@ -404,31 +528,43 @@ export default function Nosotros() {
                     </Link>
                   </motion.div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
 
             {/* Cifras */}
-            <ul className="mt-16 grid grid-cols-2 gap-6 rounded-[2rem] border border-white/10 bg-white/[0.06] px-6 py-7 backdrop-blur-md md:px-10 lg:grid-cols-4 lg:gap-0">
+            <motion.ul
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.4 }}
+              className="mt-16 grid grid-cols-2 gap-6 rounded-[2rem] border border-white/10 bg-white/[0.06] px-6 py-7 backdrop-blur-md md:px-10 lg:grid-cols-4 lg:gap-0"
+            >
               {cifras.map(({ valor, label, color, icon: Icon }, i) => (
-                <li
+                <motion.li
                   key={label}
+                  variants={pop}
+                  whileHover={{ y: -3 }}
                   className={`flex items-center gap-3 lg:px-6 ${i > 0 ? 'lg:border-l lg:border-white/10' : ''} ${
                     i === 0 ? 'lg:pl-0' : ''
                   }`}
                 >
-                  <span
+                  <motion.span
+                    whileHover={{ rotate: 8, scale: 1.1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl"
                     style={{ backgroundColor: `${color}26`, color }}
                   >
                     <Icon className="h-6 w-6" aria-hidden="true" />
-                  </span>
+                  </motion.span>
                   <div>
-                    <span className="block text-2xl font-black leading-tight">{valor}</span>
+                    <span className="block text-2xl font-black leading-tight">
+                      <AnimatedStat valor={valor} />
+                    </span>
                     <span className="mt-0.5 block text-xs font-semibold text-slate-400">{label}</span>
                   </div>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </div>
 
           <svg
@@ -453,7 +589,11 @@ export default function Nosotros() {
               viewport={{ once: true, amount: 0.3 }}
               className="relative"
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2.5rem] shadow-[0_30px_70px_-25px_rgba(7,27,58,0.5)]">
+              <motion.div
+                whileHover={{ scale: 1.015 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                className="relative aspect-[4/3] w-full overflow-hidden rounded-[2.5rem] shadow-[0_30px_70px_-25px_rgba(7,27,58,0.5)]"
+              >
                 <Image
                   src="/box.png"
                   alt="Box de atención de Clínica Dignidad"
@@ -461,12 +601,19 @@ export default function Nosotros() {
                   sizes="(min-width: 1024px) 45vw, 100vw"
                   className="object-cover"
                 />
-              </div>
-              <div className="absolute -bottom-8 -right-4 hidden rotate-[-4deg] rounded-3xl border border-white bg-white px-7 py-5 shadow-2xl md:block">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, rotate: 6 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: -4 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3, ease: EASE }}
+                whileHover={{ rotate: 0, scale: 1.04 }}
+                className="absolute -bottom-8 -right-4 hidden rounded-3xl border border-white bg-white px-7 py-5 shadow-2xl md:block"
+              >
                 <span className={`${scriptFont.className} block text-center text-[30px] leading-tight text-[#0B2350]`}>
                   Que sonreír <br /> sea costumbre
                 </span>
-              </div>
+              </motion.div>
             </motion.div>
 
             <motion.div
@@ -489,12 +636,19 @@ export default function Nosotros() {
                 profesionales y precios al alcance de la comunidad.
               </p>
 
-              <figure className="mt-8 border-l-4 pl-6" style={{ borderColor: AMBER }}>
+              <motion.figure
+                initial={{ opacity: 0, x: -12 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2, ease: EASE }}
+                className="mt-8 border-l-4 pl-6"
+                style={{ borderColor: AMBER }}
+              >
                 <Quote className="h-6 w-6" style={{ color: AMBER }} aria-hidden="true" />
                 <blockquote className="mt-2 text-xl font-bold leading-snug text-[#071B3A]">
                   Cada paciente es atendido con respeto, dedicación y dignidad, porque tu salud es nuestra prioridad.
                 </blockquote>
-              </figure>
+              </motion.figure>
             </motion.div>
           </div>
         </section>
@@ -516,15 +670,19 @@ export default function Nosotros() {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, amount: 0.3 }}
+                  whileHover={{ y: -8, scale: 1.015 }}
+                  transition={{ type: 'spring', stiffness: 220, damping: 22 }}
                   className="flex flex-col rounded-[2rem] p-8 ring-1 ring-slate-200/80 md:p-10"
                   style={{ backgroundColor: `${color}0D` }}
                 >
-                  <span
+                  <motion.span
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     className="flex h-14 w-14 items-center justify-center rounded-2xl"
                     style={{ backgroundColor: `${color}1F`, color }}
                   >
                     <Icon className="h-7 w-7" aria-hidden="true" />
-                  </span>
+                  </motion.span>
                   <h3 className="mt-6 text-2xl font-black text-[#071B3A]">{titulo}</h3>
                   <p className="mt-3 text-[16px] leading-relaxed text-slate-600">{texto}</p>
                 </motion.article>
@@ -536,11 +694,15 @@ export default function Nosotros() {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
+                whileHover={{ y: -8, scale: 1.015 }}
+                transition={{ type: 'spring', stiffness: 220, damping: 22 }}
                 className="relative overflow-hidden rounded-[2rem] bg-[#071B3A] p-8 md:p-10"
               >
-                <div
+                <motion.div
                   aria-hidden="true"
                   className="pointer-events-none absolute -right-20 -top-20 h-[260px] w-[260px] rounded-full bg-[#0A9BB8]/20 blur-3xl"
+                  animate={{ y: [0, -16, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 <div className="relative">
                   <span
@@ -553,10 +715,18 @@ export default function Nosotros() {
                   <p className="mt-3 text-[16px] leading-relaxed text-slate-300">
                     Nos guiamos por principios que se reflejan en cada atención:
                   </p>
-                  <ul className="mt-6 flex flex-wrap gap-2">
+                  <motion.ul
+                    variants={stagger}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.4 }}
+                    className="mt-6 flex flex-wrap gap-2"
+                  >
                     {valores.map((v, i) => (
-                      <li
+                      <motion.li
                         key={v}
+                        variants={pop}
+                        whileHover={{ scale: 1.08, y: -2 }}
                         className="rounded-full border px-3.5 py-1.5 text-[13.5px] font-bold"
                         style={{
                           borderColor: `${BRAND_BAR[i % BRAND_BAR.length]}66`,
@@ -565,9 +735,9 @@ export default function Nosotros() {
                         }}
                       >
                         {v}
-                      </li>
+                      </motion.li>
                     ))}
-                  </ul>
+                  </motion.ul>
                 </div>
               </motion.article>
             </div>
@@ -576,7 +746,10 @@ export default function Nosotros() {
 
         {/* ================= CÓMO FUNCIONA ================= */}
         <section className="bg-white px-3 py-4 md:px-6">
-          <div className="relative overflow-hidden rounded-[2.5rem] px-5 py-20 md:px-12 md:py-28" style={{ backgroundColor: SOFT }}>
+          <div
+            className="relative overflow-hidden rounded-[2.5rem] px-5 py-20 md:px-12 md:py-28"
+            style={{ backgroundColor: SOFT }}
+          >
             <div className="mx-auto max-w-[1300px]">
               <SectionHeader
                 title="Cómo funciona tu atención"
@@ -594,21 +767,26 @@ export default function Nosotros() {
                     viewport={{ once: true, amount: 0.3 }}
                     className="relative"
                   >
-                    {/* Línea de tiempo entre pasos */}
                     {i < pasos.length - 1 && (
-                      <span
+                      <motion.span
                         aria-hidden="true"
-                        className="absolute left-14 top-[26px] hidden h-[2px] w-[calc(100%-3.5rem)] lg:block"
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.7, delay: 0.2 + i * 0.1, ease: EASE }}
+                        className="absolute left-14 top-[26px] hidden h-[2px] w-[calc(100%-3.5rem)] origin-left lg:block"
                         style={{ background: `linear-gradient(90deg, ${color}66, transparent)` }}
                       />
                     )}
                     <div className="flex items-center gap-4">
-                      <span
+                      <motion.span
+                        whileHover={{ scale: 1.12, rotate: -6 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                         className="flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white shadow-lg"
                         style={{ backgroundColor: color }}
                       >
                         {i + 1}
-                      </span>
+                      </motion.span>
                     </div>
                     <h3 className="mt-5 text-xl font-black leading-tight text-[#071B3A]">{titulo}</h3>
                     <p className="mt-2.5 max-w-[34ch] text-[15px] leading-relaxed text-slate-600">{texto}</p>
@@ -632,17 +810,27 @@ export default function Nosotros() {
         {/* ================= COMPROMISO ================= */}
         <section className="bg-white px-3 py-4 md:px-6">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-[#071B3A] px-5 py-20 md:px-12 md:py-28">
-            <div
+            <motion.div
               aria-hidden="true"
               className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] rounded-full bg-[#0A9BB8]/15 blur-3xl"
+              animate={{ y: [0, -22, 0], x: [0, 14, 0] }}
+              transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
             />
-            <div
+            <motion.div
               aria-hidden="true"
               className="pointer-events-none absolute -bottom-32 -left-24 h-[380px] w-[380px] rounded-full bg-[#B01C48]/15 blur-3xl"
+              animate={{ y: [0, 18, 0], x: [0, -10, 0] }}
+              transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
             />
 
             <div className="relative mx-auto grid max-w-[1300px] gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
-              <div className="self-start lg:sticky lg:top-32">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.6, ease: EASE }}
+                className="self-start lg:sticky lg:top-32"
+              >
                 <h2 className="text-4xl font-black leading-[1.08] tracking-tight text-white md:text-[50px]">
                   Sonríe tranquilo, estás en buenas manos
                 </h2>
@@ -652,7 +840,7 @@ export default function Nosotros() {
                 <p className={`${scriptFont.className} mt-6 text-4xl leading-tight text-[#22B3CF]`}>
                   Cuidamos siempre tu sonrisa
                 </p>
-              </div>
+              </motion.div>
 
               <ul className="divide-y divide-white/10">
                 {compromiso.map(({ titulo, texto, color, icon: Icon }, i) => (
@@ -665,12 +853,14 @@ export default function Nosotros() {
                     viewport={{ once: true, amount: 0.3 }}
                     className="flex gap-5 py-9 first:pt-0 last:pb-0"
                   >
-                    <span
+                    <motion.span
+                      whileHover={{ rotate: 10, scale: 1.12 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                       className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full"
                       style={{ backgroundColor: `${color}2E`, color }}
                     >
                       <Icon className="h-7 w-7" aria-hidden="true" />
-                    </span>
+                    </motion.span>
                     <div>
                       <h3 className="text-2xl font-black text-white">{titulo}</h3>
                       <p className="mt-2 max-w-md text-[17px] leading-relaxed text-slate-300">{texto}</p>
@@ -701,13 +891,17 @@ export default function Nosotros() {
                 transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 className="relative overflow-hidden rounded-[2.5rem] bg-[#071B3A] p-8 shadow-2xl md:p-12"
               >
-                <div
+                <motion.div
                   aria-hidden="true"
                   className="pointer-events-none absolute -right-28 -top-28 h-[360px] w-[360px] rounded-full bg-[#0A9BB8]/15 blur-3xl"
+                  animate={{ y: [0, -16, 0] }}
+                  transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
                 />
-                <div
+                <motion.div
                   aria-hidden="true"
                   className="pointer-events-none absolute -bottom-32 -left-20 h-[280px] w-[280px] rounded-full bg-[#FDB92B]/10 blur-3xl"
+                  animate={{ y: [0, 14, 0] }}
+                  transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
                 />
 
                 <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -726,7 +920,9 @@ export default function Nosotros() {
                   </div>
 
                   <motion.div
-                    whileHover={{ scale: 1.04, rotate: 1 }}
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    whileHover={{ scale: 1.06, rotate: 3 }}
                     className="flex h-28 w-28 items-center justify-center rounded-[2rem] border border-white/10 bg-white/[0.06] shadow-xl"
                   >
                     <Stethoscope className="h-12 w-12 text-[#22B3CF]" aria-hidden="true" />
@@ -745,7 +941,6 @@ export default function Nosotros() {
                 </div>
               </motion.div>
             </div>
-
           </div>
         </section>
 
@@ -758,14 +953,20 @@ export default function Nosotros() {
           />
 
           <div className="relative z-10 mx-auto max-w-[1000px] px-4 md:px-8">
-            <div className="mb-12 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.6, ease: EASE }}
+              className="mb-12 text-center"
+            >
               <h2 className="text-4xl font-black tracking-tight text-[#071B3A] md:text-5xl">
                 Todo lo que necesitas saber
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg font-medium text-slate-600">
                 Respuestas rápidas sobre nuestros servicios, procedimientos y atención al paciente.
               </p>
-            </div>
+            </motion.div>
 
             <div className="space-y-4">
               {faqs.map((faq, i) => (
@@ -786,13 +987,20 @@ export default function Nosotros() {
         <section id="agenda" className="scroll-mt-24 bg-white px-3 pb-6 md:px-6 md:pb-10">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0B2350] to-[#071B3A]">
             <BrandBar />
-            <div
+            <motion.div
               aria-hidden="true"
               className="pointer-events-none absolute -right-24 top-10 h-[360px] w-[360px] rounded-full bg-[#FDB92B]/10 blur-3xl"
+              animate={{ y: [0, -18, 0], x: [0, 10, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
             />
 
             <div className="relative mx-auto grid max-w-[1300px] items-center gap-12 px-5 py-16 md:px-12 md:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.6, ease: EASE }}
+              >
                 <h2 className="text-4xl font-black leading-[1.08] tracking-tight text-white md:text-[50px]">
                   Da el primer paso hoy
                 </h2>
@@ -809,7 +1017,7 @@ export default function Nosotros() {
                       aria-hidden="true"
                     />
                   </AgendaLink>
-                  <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+                  <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.96 }} className="w-full sm:w-auto">
                     <Link
                       href="/equipo"
                       className={`flex items-center justify-center gap-2 rounded-full border border-white/25 px-8 py-4 text-[15px] font-bold text-white transition-colors hover:border-white hover:bg-white/10 ${focusDark}`}
@@ -819,9 +1027,15 @@ export default function Nosotros() {
                     </Link>
                   </motion.div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="rounded-[2rem] bg-white p-8 shadow-2xl md:p-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
+                className="rounded-[2rem] bg-white p-8 shadow-2xl md:p-10"
+              >
                 <p className="text-sm font-bold text-slate-500">Atención rápida</p>
                 <a
                   href={PHONE_HREF}
@@ -856,7 +1070,7 @@ export default function Nosotros() {
                   <ClipboardList className="h-4 w-4 flex-shrink-0" style={{ color: TEAL }} aria-hidden="true" />
                   Lleva tu cédula y, si tienes, radiografías previas.
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>

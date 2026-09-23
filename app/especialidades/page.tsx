@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
-import { Nunito, Dancing_Script } from 'next/font/google';
+import { AnimatePresence, MotionConfig, motion, Variants } from 'framer-motion';import { Nunito, Dancing_Script } from 'next/font/google';
 import {
   ArrowRight,
   Baby,
@@ -35,7 +34,7 @@ const MAGENTA_LIGHT = '#E5527B';
 const SOFT = '#F6F9FD';
 const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 
-const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
+const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';

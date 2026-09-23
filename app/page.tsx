@@ -61,7 +61,7 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
-const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
+const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 // Confirma que este número tenga WhatsApp; si no, elimina el botón de la sección #agenda.
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
 

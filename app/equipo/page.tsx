@@ -2,14 +2,23 @@
 
 import { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { AnimatePresence, MotionConfig, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import {
+  AnimatePresence,
+  MotionConfig,
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
   ArrowRight,
   Baby,
   CalendarCheck,
   Footprints,
+  Heart,
   HeartPulse,
   MessageCircle,
   Phone,
@@ -17,12 +26,12 @@ import {
   Smile,
   Sparkles,
   Stethoscope,
+  Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Tokens de marca (mismos de la home y el Navbar).                   */
-/*  Ideal: moverlos a src/lib/brand.ts e importarlos en los tres.      */
 /* ------------------------------------------------------------------ */
 const mainFont = Nunito({ subsets: ['latin'], display: 'swap' });
 const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
@@ -30,6 +39,7 @@ const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
 const NAVY = '#071B3A';
 const AMBER = '#FDB92B';
 const TEAL = '#0A9BB8';
+const TEAL_LIGHT = '#22B3CF';
 const GREEN = '#6B9A2A';
 const MAGENTA = '#B01C48';
 const SOFT = '#F6F9FD';
@@ -38,6 +48,7 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
+const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 
 const focusDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
@@ -46,11 +57,6 @@ const focusLight =
 
 /* ------------------------------------------------------------------ */
 /*  Áreas y equipo                                                     */
-/*                                                                     */
-/*  FOTOS: deja los archivos en /public/equipo/ con el mismo nombre    */
-/*  del campo `foto`. Recorte recomendado: vertical 4:5 (ej. 800x1000) */
-/*  con la cara en el tercio superior. Si falta la foto, la tarjeta    */
-/*  muestra el monograma y no se rompe el diseño.                      */
 /* ------------------------------------------------------------------ */
 type AreaId = 'cirugia' | 'ortodoncia' | 'endodoncia' | 'rehabilitacion' | 'general' | 'podologia';
 
@@ -259,9 +265,66 @@ function BrandBar({ className = '' }: { className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Número que cuenta hacia arriba al entrar en pantalla                */
+/* ------------------------------------------------------------------ */
+function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.span
+      ref={spanRef}
+      onViewportEnter={() => {
+        if (started.current) return;
+        started.current = true;
+        if (reduceMotion) {
+          if (spanRef.current) spanRef.current.textContent = `${to}${suffix}`;
+          return;
+        }
+        animate(0, to, {
+          duration: 1.3,
+          ease: EASE_OUT,
+          onUpdate: (v) => {
+            if (spanRef.current) spanRef.current.textContent = `${Math.round(v)}${suffix}`;
+          },
+        });
+      }}
+      viewport={{ once: true, amount: 0.9 }}
+    >
+      0{suffix}
+    </motion.span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Cinta infinita con las especialidades — firma visual de esta página */
+/* ------------------------------------------------------------------ */
+function TickerEspecialidades() {
+  const items = Object.values(AREAS);
+  const dobles = [...items, ...items];
+
+  return (
+    <div aria-hidden="true" className="relative mt-14 overflow-hidden border-y border-white/10 py-4">
+      <style>{`
+        @keyframes dignidad-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      `}</style>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#071B3A] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#071B3A] to-transparent" />
+      <div className="flex w-max gap-10" style={{ animation: 'dignidad-ticker 26s linear infinite' }}>
+        {dobles.map(({ titulo, color, icon: Icon }, i) => (
+          <span key={i} className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-slate-300">
+            <Icon className="h-4 w-4" style={{ color }} />
+            {titulo}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Efectos de tarjeta — Spotlight + Tilt                             */
-/*  Inspirados en patrones de React Bits / Animate UI y ejecutados    */
-/*  sobre el mismo motor Motion que ya utiliza esta página.           */
 /* ------------------------------------------------------------------ */
 function SpotlightCard({
   children,
@@ -300,7 +363,6 @@ function SpotlightCard({
         '--spot-y': '35%',
       } as React.CSSProperties}
     >
-      {/* Spotlight tipo React Bits: luz limpia, sin capa gris. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -357,7 +419,7 @@ function TiltSurface({ children }: { children: React.ReactNode }) {
 function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
   const area = AREAS[m.area];
   const Icon = area.icon;
-  const href = `/#agenda?especialista=${slugify(m.nombre)}`;
+  const href = `${AGENDA_HREF}?especialista=${slugify(m.nombre)}`;
 
   return (
     <motion.li
@@ -495,8 +557,10 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 380, damping: 24 }}
             >
-              <Link
+              <a
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`group/btn flex items-center justify-center gap-2 rounded-full border-2 border-[#071B3A] py-3 text-[14px] font-extrabold text-[#071B3A] transition-colors duration-200 hover:border-[#FDB92B] hover:bg-[#FDB92B] ${focusLight}`}
               >
                 <motion.span whileHover={{ rotate: -8 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
@@ -511,7 +575,7 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
                 >
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </motion.span>
-              </Link>
+              </a>
             </motion.div>
             <span className="sr-only">con {m.nombre}</span>
           </div>
@@ -526,6 +590,20 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
 /* ------------------------------------------------------------------ */
 export default function Equipo() {
   const [filtro, setFiltro] = useState<AreaId | 'todos'>('todos');
+  const reduceMotion = useReducedMotion();
+
+  // Glow que sigue al cursor en el hero — se apaga con "reducir movimiento".
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const glowSpringX = useSpring(glowX, { stiffness: 110, damping: 20, mass: 0.4 });
+  const glowSpringY = useSpring(glowY, { stiffness: 110, damping: 20, mass: 0.4 });
+
+  const handleHeroMove = (event: React.PointerEvent<HTMLElement>) => {
+    if (reduceMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    glowX.set(event.clientX - rect.left);
+    glowY.set(event.clientY - rect.top);
+  };
 
   const conteos = useMemo(() => {
     return equipo.reduce<Record<string, number>>((acc, m) => {
@@ -550,7 +628,10 @@ export default function Equipo() {
     <MotionConfig reducedMotion="user">
       <main className={`${mainFont.className} flex min-h-screen flex-col overflow-x-hidden bg-white`}>
         {/* ================= PORTADA ================= */}
-        <section className="relative isolate overflow-hidden bg-[#071B3A] text-white">
+        <section
+          onPointerMove={handleHeroMove}
+          className="relative isolate overflow-hidden bg-[#071B3A] text-white"
+        >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
             <motion.div
               className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#0A9BB8]/25 blur-3xl"
@@ -566,9 +647,29 @@ export default function Equipo() {
               animate={{ x: [0, 12, -8, 0], y: [0, -10, 6, 0] }}
               transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
             />
+            {/* Grano sutil: le quita el aspecto "gradiente plano" al fondo. */}
+            <div
+              className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+              }}
+            />
             <div
               className="absolute inset-0 opacity-[0.07]"
               style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '28px 28px' }}
+            />
+            {/* Glow que sigue al cursor — firma visual de esta página. */}
+            <motion.div
+              aria-hidden="true"
+              className="absolute left-0 top-0 hidden h-[420px] w-[420px] rounded-full opacity-60 mix-blend-screen md:block"
+              style={{
+                x: glowSpringX,
+                y: glowSpringY,
+                marginLeft: -210,
+                marginTop: -210,
+                background: `radial-gradient(circle, ${TEAL_LIGHT}45, transparent 70%)`,
+              }}
             />
           </div>
 
@@ -607,6 +708,66 @@ export default function Equipo() {
                 </motion.p>
               </motion.div>
             </motion.div>
+
+            {/* Cinta infinita con las especialidades */}
+            <TickerEspecialidades />
+          </div>
+
+          {/* Cápsula flotante con contadores: firma visual entre el hero y la grilla */}
+          <div
+            aria-hidden={false}
+            className="pointer-events-none absolute inset-x-0 bottom-[-2rem] z-20 hidden justify-center md:flex"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.6, ease: EASE_OUT }}
+              className="pointer-events-auto flex items-center divide-x divide-slate-200 rounded-full bg-white px-8 py-4 shadow-[0_25px_55px_-18px_rgba(7,27,58,0.4)] ring-1 ring-slate-100"
+            >
+              <div className="flex items-center gap-3 pr-8">
+                <span
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${TEAL}1A`, color: TEAL }}
+                >
+                  <Users className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-2xl font-black leading-none text-[#071B3A]">
+                    <Counter to={equipo.length} suffix="+" />
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Especialistas</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-8">
+                <span
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${AMBER}1F`, color: '#B8860B' }}
+                >
+                  <Stethoscope className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-2xl font-black leading-none text-[#071B3A]">
+                    <Counter to={Object.keys(AREAS).length} />
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Áreas de atención</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 pl-8">
+                <span
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${MAGENTA}1A`, color: MAGENTA }}
+                >
+                  <Heart className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-2xl font-black leading-none text-[#071B3A]">
+                    <Counter to={100} suffix="%" />
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Trato cercano</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           <svg
@@ -621,7 +782,7 @@ export default function Equipo() {
         </section>
 
         {/* ================= EQUIPO ================= */}
-        <section className="pb-24 pt-10 md:pb-28" style={{ backgroundColor: SOFT }}>
+        <section className="pb-24 pt-10 md:pb-28 md:pt-24" style={{ backgroundColor: SOFT }}>
           <div className="mx-auto max-w-[1320px] px-4 md:px-8">
             {/* Filtro por especialidad */}
             <motion.div
@@ -718,8 +879,10 @@ export default function Equipo() {
                   costo.
                 </p>
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="mt-8 w-fit">
-                  <Link
-                    href="/#agenda"
+                  <a
+                    href={AGENDA_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`group flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-extrabold text-[#071B3A] shadow-[0_10px_30px_-8px_rgba(253,185,43,0.7)] transition-colors hover:bg-[#FFC94F] ${focusDark}`}
                     style={{ backgroundColor: AMBER }}
                   >
@@ -729,7 +892,7 @@ export default function Equipo() {
                       className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1"
                       aria-hidden="true"
                     />
-                  </Link>
+                  </a>
                 </motion.div>
               </motion.div>
 
