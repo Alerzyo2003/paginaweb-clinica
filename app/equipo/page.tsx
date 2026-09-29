@@ -107,6 +107,13 @@ const equipo: Miembro[] = [
     foto: '/equipo/diego-torrijos.png',
   },
   {
+    nombre: 'Dra. Natalia Álvarez',
+    rol: 'Endodoncista',
+    descripcion: 'Me especializo en conservar tus dientes naturales con procedimientos minuciosos y un control absoluto del dolor desde el primer momento.',
+    area: 'endodoncia',
+    foto: '/equipo/natalia.png',
+  },
+  {
     nombre: 'Dr. Víctor Morgado',
     rol: 'Ortodoncista y odontopediatra',
     descripcion: 'Acompaña el crecimiento dental de niñas y niños, y corrige la mordida a tiempo.',
