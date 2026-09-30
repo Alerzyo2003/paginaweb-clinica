@@ -161,7 +161,7 @@ export default function OdontologiaGeneralPage() {
 
               <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-[#071B3A]">
                 <Image
-                  src="/especialidades/odontologia-general.png"
+                  src="/especialidades/odontologia.png"
                   alt="Paciente adulto feliz en su consulta de odontología general"
                   fill
                   className="object-cover"
