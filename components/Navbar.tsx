@@ -61,6 +61,7 @@ const especialidades = [
   { name: 'Estética dental', desc: 'Blanqueamiento y carillas', icon: Sparkles, color: '#E5527B', href: '/especialidades/estetica-dental' },
   { name: 'Odontopediatría', desc: 'Atención para niños', icon: Baby, color: '#22B3CF', href: '/especialidades/odontopediatria' },
   { name: 'Rehabilitación oral', desc: 'Prótesis y función masticatoria', icon: HeartPulse, color: '#FDB92B', href: '/especialidades/rehabilitacion-oral' },
+  { name: 'Odontología General', desc: 'Cuidado y prevención dental', icon: Smile, color: '#FDB92B', href: '/especialidades/odontologia' },
 ];
 
 const focusRing =
