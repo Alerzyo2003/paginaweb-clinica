@@ -49,6 +49,7 @@ const navLinks = [
   { name: 'Nosotros', href: '/nosotros', id: 'nosotros' },
   { name: 'Especialidades', href: '/especialidades', hasDropdown: true, id: 'especialidades' },
   { name: 'Convenios', href: '/convenios', id: 'convenios' },
+  { name: 'Fonasa', href: '/fonasa', id: 'fonasa' }, // <-- Link a Fonasa agregado
 ];
 
 const especialidades = [
