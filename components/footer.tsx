@@ -141,13 +141,7 @@ export default function Footer() {
             © 2026 <strong className="text-[#0f2950]">Clínica Dignidad</strong>. Todos los derechos reservados.
           </div>
           
-          <div className="flex flex-wrap justify-center items-center gap-3 text-[12px] font-medium text-[#475569]">
-            <Link href="/terminos-y-condiciones" className="hover:text-blue-600">Términos y Condiciones</Link>
-            <span className="text-blue-200">|</span>
-            <Link href="/politica-de-privacidad" className="hover:text-blue-600">Política de Privacidad</Link>
-            <span className="text-blue-200">|</span>
-            <Link href="/canal-de-denuncias" className="hover:text-blue-600">Canal de Denuncias</Link>
-          </div>
+          
 
           <div className="flex flex-col items-center lg:items-end">
             <span className="font-serif italic text-blue-600 text-[18px] leading-none">Cuidamos tu sonrisa</span>
