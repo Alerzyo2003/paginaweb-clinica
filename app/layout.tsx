@@ -1,6 +1,7 @@
 import './globals.css'
 import Navbar from '@/components/Navbar'; // Importar el Navbar
 import Footer from '@/components/footer'; // Importar el Footer
+import CustomCursor from '@/components/CustomCursor'; // <-- Importar el nuevo cursor animado
 
 export const metadata = {
   title: 'Clínica Dignidad',
@@ -15,6 +16,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="flex flex-col min-h-screen">
+        
+        {/* Aquí cargas el cursor globalmente (invisible en móviles automáticamente) */}
+        <CustomCursor />
         
         {/* Aquí cargas el Navbar globalmente */}
         <Navbar />
