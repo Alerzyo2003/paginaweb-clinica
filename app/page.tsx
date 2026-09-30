@@ -15,6 +15,7 @@ import {
 } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
+  AlertCircle,
   ArrowRight,
   ArrowUpRight,
   Baby,
@@ -25,14 +26,17 @@ import {
   Gem,
   Heart,
   HeartPulse,
+  Info,
   MessageCircle,
   Phone,
+  RefreshCcw,
   ShieldCheck,
   Smile,
   Sparkles,
   Star,
   Stethoscope,
   Users,
+  Zap,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -41,8 +45,6 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* ------------------------------------------------------------------ */
 /*  Tipografías y colores: los mismos del Navbar                       */
-/*  (Si mueves esto a un archivo compartido, importa desde ahí en      */
-/*   ambos componentes.)                                               */
 /* ------------------------------------------------------------------ */
 const mainFont = Nunito({ subsets: ['latin'], display: 'swap' });
 const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
@@ -62,7 +64,6 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
-// Confirma que este número tenga WhatsApp; si no, elimina el botón de la sección #agenda.
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
 
 const focusDark =
@@ -148,7 +149,6 @@ const esencia: { icon: LucideIcon; color: string; title: string; text: string }[
   },
 ];
 
-// Mantén esta lista igual a la del Navbar (idealmente muévela a un archivo compartido).
 const especialidades: { name: string; desc: string; icon: LucideIcon; color: string; href: string }[] = [
   { name: 'Ortodoncia', desc: 'Brackets y alineadores', icon: Smile, color: TEAL_LIGHT, href: '/especialidades/ortodoncia' },
   { name: 'Implantología', desc: 'Recupera piezas perdidas', icon: ShieldCheck, color: AMBER, href: '/especialidades/implantologia' },
@@ -178,10 +178,81 @@ const faqs = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Datos y Lógica del Diagnóstico Interactivo                         */
+/* ------------------------------------------------------------------ */
+type FlowNode = {
+  q?: string;
+  options?: { label: string; icon?: LucideIcon; next: string }[];
+  resultTitle?: string;
+  resultDesc?: string;
+};
+
+const DIAGNOSTIC_FLOW: Record<string, FlowNode> = {
+  start: {
+    q: '¿Qué estás sintiendo?',
+    options: [
+      { label: 'Dolor', icon: AlertCircle, next: 'dolor_1' },
+      { label: 'Sensibilidad', icon: Zap, next: 'sensibilidad_result' },
+      { label: 'Diente roto', icon: HeartPulse, next: 'roto_result' },
+      { label: 'Diente faltante', icon: Smile, next: 'faltante_result' },
+      { label: 'Mejorar mi sonrisa', icon: Sparkles, next: 'sonrisa_result' },
+    ],
+  },
+  dolor_1: {
+    q: '¿El dolor aparece al comer o beber algo frío o caliente?',
+    options: [
+      { label: 'Sí, al comer cosas frías/calientes', next: 'dolor_2' },
+      { label: 'No, duele al morder o espontáneamente', next: 'dolor_3' },
+    ],
+  },
+  dolor_2: {
+    q: '¿El dolor permanece varios segundos/minutos después de retirar el estímulo?',
+    options: [
+      { label: 'Sí, el dolor se queda', next: 'endodoncia_result' },
+      { label: 'No, desaparece rápido', next: 'caries_result' },
+    ],
+  },
+  dolor_3: {
+    q: '¿Sientes dolor intenso al morder o masticar?',
+    options: [
+      { label: 'Sí', next: 'endodoncia_result' },
+      { label: 'No, es dolor constante', next: 'evaluacion_result' },
+    ],
+  },
+  endodoncia_result: {
+    resultTitle: 'Podría requerir evaluación de Endodoncia',
+    resultDesc: 'Una evaluación profesional permitirá determinar si el nervio del diente está afectado y necesita un tratamiento de conducto u otro procedimiento.',
+  },
+  caries_result: {
+    resultTitle: 'Podría tratarse de una Caries Profunda',
+    resultDesc: 'El dolor punzante de corta duración suele indicar que una caries está avanzando. Es clave revisarlo pronto.',
+  },
+  sensibilidad_result: {
+    resultTitle: 'Posible Sensibilidad Dentaria',
+    resultDesc: 'Puede deberse a desgaste del esmalte, encías retraídas o caries incipiente. Un especialista te indicará el mejor tratamiento.',
+  },
+  roto_result: {
+    resultTitle: 'Evaluación para Restauración o Corona',
+    resultDesc: 'Dependiendo del nivel de la fractura, podríamos recuperar tu diente con una tapadura estética o una corona dental.',
+  },
+  faltante_result: {
+    resultTitle: 'Evaluación para Implante o Prótesis',
+    resultDesc: 'Para recuperar dientes perdidos y volver a masticar con confianza, la mejor opción suele ser un implante o una prótesis.',
+  },
+  sonrisa_result: {
+    resultTitle: 'Estética Dental u Ortodoncia',
+    resultDesc: 'Existen múltiples opciones como Brackets, Alineadores Invisibles, Blanqueamiento o Carillas para lograr tu sonrisa ideal.',
+  },
+  evaluacion_result: {
+    resultTitle: 'Requiere Evaluación Clínica',
+    resultDesc: 'Las molestias dentales tienen muchas causas. Lo más seguro es realizar un diagnóstico con radiografías en clínica.',
+  },
+};
+
+/* ------------------------------------------------------------------ */
 /*  Piezas reutilizables                                               */
 /* ------------------------------------------------------------------ */
 
-/** Divide un texto en palabras que suben desde una máscara (para el titular del hero). */
 function SplitWords({ text }: { text: string }) {
   return (
     <>
@@ -196,7 +267,6 @@ function SplitWords({ text }: { text: string }) {
   );
 }
 
-/** Barra con los 4 colores del logo, igual a la del Navbar. */
 function BrandBar({ className = '' }: { className?: string }) {
   return (
     <div className={`flex h-[3px] w-full ${className}`} aria-hidden="true">
@@ -226,7 +296,6 @@ function SectionHeader({ title, text, dark = false }: { title: string; text?: st
   );
 }
 
-/** Botón ámbar del Navbar, con respuesta al hover/tap. */
 function AmberLink({
   href,
   children,
@@ -269,7 +338,6 @@ function AmberLink({
   );
 }
 
-/** Barra fija inferior en móvil: el Navbar oculta su botón de agenda en pantallas chicas. */
 function MobileCta() {
   const { scrollY } = useScroll();
   const [show, setShow] = useState(false);
@@ -311,7 +379,6 @@ function MobileCta() {
   );
 }
 
-/** Pregunta del acordeón: solo una abierta a la vez, accesible con teclado. */
 function FaqItem({
   index,
   q,
@@ -376,22 +443,24 @@ function FaqItem({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Página                                                             */
+/*  Página principal                                                   */
 /* ------------------------------------------------------------------ */
 export default function Home() {
   const containerRef = useRef<HTMLElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  
+  // Estado para el widget diagnóstico
+  const [diagStep, setDiagStep] = useState<string>('start');
+  const currentNode = DIAGNOSTIC_FLOW[diagStep];
 
   useGSAP(
     () => {
       const root = containerRef.current;
       if (!root) return;
 
-      // Todo el movimiento se apaga si la persona pidió "reducir movimiento".
       const mm = gsap.matchMedia(root);
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        /* --- 1. Entrada del hero (el momento orquestado de la página) --- */
         gsap
           .timeline({ defaults: { ease: 'power3.out' } })
           .from('[data-hero="badge"]', { y: 16, opacity: 0, duration: 0.6 })
@@ -401,7 +470,6 @@ export default function Home() {
           .from('[data-hero="chip"]', { scale: 0.6, opacity: 0, duration: 0.7, stagger: 0.15, ease: 'back.out(1.7)' }, '-=0.5')
           .from('[data-hero="stat"]', { y: 30, opacity: 0, duration: 0.7, stagger: 0.1 }, '-=0.4');
 
-        /* --- 2. Movimiento ambiental (muy sutil) --- */
         gsap.to('[data-spin]', { rotation: 360, duration: 48, repeat: -1, ease: 'none' });
         gsap.utils.toArray<HTMLElement>('[data-float]', root).forEach((el, i) => {
           gsap.to(el, {
@@ -414,7 +482,6 @@ export default function Home() {
           });
         });
 
-        /* --- 3. Parallax --- */
         gsap.utils.toArray<HTMLElement>('[data-parallax]', root).forEach((el) => {
           gsap.to(el, {
             yPercent: Number(el.dataset.parallax) || -10,
@@ -428,7 +495,6 @@ export default function Home() {
           });
         });
 
-        /* --- 4. Contadores --- */
         root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
           const end = Number(el.dataset.count);
           const prefix = el.dataset.prefix ?? '';
@@ -446,7 +512,6 @@ export default function Home() {
           });
         });
 
-        /* --- 5. Líneas que se dibujan en la lista de especialidades --- */
         gsap.utils.toArray<HTMLElement>('[data-line]', root).forEach((el) => {
           gsap.fromTo(
             el,
@@ -460,7 +525,6 @@ export default function Home() {
           );
         });
 
-        /* --- 6. Aparición escalonada solo en grupos (equipo, nosotros, especialidades) --- */
         const reveals = gsap.utils.toArray<HTMLElement>('[data-reveal]', root);
         gsap.set(reveals, { opacity: 0, y: 28 });
         ScrollTrigger.batch(reveals, {
@@ -481,7 +545,6 @@ export default function Home() {
       <main ref={containerRef} className={`${mainFont.className} flex min-h-screen flex-col overflow-x-hidden bg-white`}>
         {/* ================= HERO ================= */}
         <section id="inicio" className="relative isolate overflow-hidden bg-[#071B3A] text-white">
-          {/* Fondo: resplandores con los colores del logo + trama de puntos */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#0A9BB8]/25 blur-3xl" />
             <div className="absolute -right-32 top-1/3 h-[460px] w-[460px] rounded-full bg-[#B01C48]/20 blur-3xl" />
@@ -494,7 +557,6 @@ export default function Home() {
 
           <div className="mx-auto max-w-[1400px] px-4 pt-10 md:px-8 md:pt-14 lg:pt-16">
             <div className="grid items-center gap-12 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pb-16">
-              {/* Columna izquierda */}
               <div className="space-y-6">
                 <div
                   data-hero="photo"
@@ -508,8 +570,6 @@ export default function Home() {
                     className="object-cover"
                   />
                 </div>
-
-                
 
                 <h1 className="text-[40px] font-black leading-[1.08] tracking-tight md:text-5xl lg:text-[56px]">
                   <SplitWords text="Tu sonrisa nos importa." />
@@ -557,14 +617,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Columna derecha: foto con órbita de colores del logo */}
               <div
                 data-parallax="-6"
                 data-parallax-start="top top"
                 className="relative hidden lg:block"
               >
                 <div className="relative mx-auto aspect-square w-full max-w-[420px] xl:max-w-[460px]">
-                  {/* Anillo orbital con los 4 colores del logo */}
                   <div
                     data-spin
                     aria-hidden="true"
@@ -590,7 +648,6 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* Tarjeta: evaluación gratis */}
                   <div data-hero="chip" data-float className="absolute -bottom-6 -left-12">
                     <div className="flex items-center gap-4 rounded-3xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
                       <span
@@ -610,7 +667,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Chip: urgencias */}
                   <div data-hero="chip" data-float className="absolute -right-8 top-8">
                     <div className="flex items-center gap-2.5 rounded-2xl border border-white/20 bg-[#0B2350]/90 px-4 py-2.5 shadow-xl backdrop-blur">
                       <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
@@ -624,7 +680,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Franja de datos */}
             <div className="pb-20 md:pb-24">
               <div className="grid grid-cols-2 gap-6 rounded-[2rem] border border-white/10 bg-white/[0.06] px-6 py-6 backdrop-blur-md md:px-10 lg:grid-cols-4 lg:gap-0">
                 {stats.map(({ icon: Icon, color, value, label }, i) => (
@@ -651,7 +706,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Transición curva hacia la sección siguiente */}
           <svg
             aria-hidden="true"
             className="absolute bottom-[-1px] left-0 h-10 w-full md:h-16"
@@ -736,7 +790,6 @@ export default function Home() {
 
         {/* ================= NOSOTROS ================= */}
         <section id="nosotros" className="relative scroll-mt-24 overflow-hidden bg-white py-20 md:py-28">
-          {/* Diente decorativo */}
           <div
             data-parallax="-12"
             aria-hidden="true"
@@ -777,6 +830,92 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        {/* ================= WIDGET DIAGNÓSTICO ORIENTATIVO ================= */}
+        <section id="diagnostico-interactivo" className="scroll-mt-24 px-3 md:px-6 py-6" data-reveal>
+          <div className="relative mx-auto max-w-[1300px] overflow-hidden rounded-[2.5rem] bg-[#EEF4FC] p-8 md:p-14 lg:p-16 border border-slate-200">
+            <div className="mb-10 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm text-[#0A9BB8]">
+                <Stethoscope className="h-6 w-6" />
+              </div>
+              <h2 className="text-3xl font-black text-[#071B3A] md:text-4xl">¿Qué estás sintiendo?</h2>
+              <p className="mt-3 text-lg font-medium text-slate-600 max-w-2xl mx-auto">
+                Realiza este diagnóstico orientativo interactivo y descubre cuál podría ser tu tratamiento.
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={diagStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                  className="rounded-3xl bg-white p-6 shadow-xl md:p-8 border border-slate-100"
+                >
+                  {currentNode.q ? (
+                    // Pantalla de Pregunta
+                    <div>
+                      <h3 className="text-xl font-bold text-[#071B3A] text-center mb-6">{currentNode.q}</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {currentNode.options?.map((opt) => {
+                          const Icon = opt.icon;
+                          return (
+                            <button
+                              key={opt.label}
+                              onClick={() => setDiagStep(opt.next)}
+                              className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4 text-left transition-all hover:border-[#0A9BB8]/40 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A9BB8]"
+                            >
+                              {Icon && <Icon className="h-6 w-6 text-[#0A9BB8] flex-shrink-0" />}
+                              <span className="font-bold text-[#071B3A]">{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    // Pantalla de Resultado
+                    <div className="text-center">
+                      <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 mb-4 border border-blue-100">
+                        <span className="text-xs font-bold uppercase tracking-widest text-[#0A9BB8]">
+                          Posible tratamiento
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-black text-[#071B3A] mb-3">
+                        {currentNode.resultTitle}
+                      </h3>
+                      <p className="text-slate-600 font-medium leading-relaxed mb-8">
+                        {currentNode.resultDesc}
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <AmberLink href={AGENDA_HREF} className="w-full sm:w-auto">
+                          Agendar evaluación gratis
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </AmberLink>
+                        <button
+                          onClick={() => setDiagStep('start')}
+                          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border-2 border-slate-200 px-6 py-3.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#071B3A]"
+                        >
+                          <RefreshCcw className="h-4 w-4" />
+                          Volver a empezar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="mt-8 flex items-start gap-2 px-2 text-left sm:items-center sm:justify-center sm:text-center">
+                <Info className="h-4 w-4 flex-shrink-0 text-slate-400 sm:mt-0 mt-0.5" />
+                <p className="text-[13px] font-medium text-slate-500 leading-tight">
+                  <strong className="text-slate-600">Importante:</strong> Esta herramienta es solo una guía orientativa y no reemplaza un diagnóstico médico o dental.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -846,7 +985,6 @@ export default function Home() {
               text="Precios accesibles, respaldo para tu reembolso y beneficios para tu grupo familiar."
             />
 
-            {/* Isapre y Fonasa */}
             <div className="mt-14 flex flex-col overflow-hidden rounded-[2.5rem] bg-[#071B3A] shadow-2xl lg:flex-row">
               <div className="flex flex-col justify-center p-8 md:p-12 lg:w-[55%] lg:p-16">
                 <h3 className="text-3xl font-black leading-tight tracking-tight text-white md:text-[40px]">
@@ -894,7 +1032,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Tarjeta Más Comunidad */}
             <div
               className="relative mt-8 flex min-h-[400px] w-full flex-col items-center overflow-hidden rounded-[2.5rem] bg-cover bg-center p-8 shadow-2xl md:min-h-[460px] md:flex-row md:p-14 lg:p-16"
               style={{ backgroundColor: '#7D41F0', backgroundImage: `url('/tarjeta.png')` }}
@@ -909,7 +1046,6 @@ export default function Home() {
                 <p className="pb-2 text-[16px] font-medium leading-relaxed text-white/90 drop-shadow-sm">
                   Accede a descuentos especiales para ti y tu grupo familiar.
                 </p>
-                {/* TODO: apunta este link a la página o PDF de convenios cuando exista */}
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     href="#agenda"
@@ -1000,7 +1136,6 @@ export default function Home() {
 
         {/* ================= PREGUNTAS FRECUENTES ================= */}
         <section id="preguntas" className="relative w-full scroll-mt-24 overflow-hidden py-24 md:py-32">
-          {/* Fondo estático de altura fija: no salta al abrir el acordeón */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute left-0 top-0 z-0 h-[1500px] w-full bg-cover bg-top bg-no-repeat"
