@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation'; // <-- Agregado para leer la ruta actual
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
@@ -41,7 +42,7 @@ const PHONE_HREF = 'tel:+56966467641';
 const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 
 /* ------------------------------------------------------------------ */
-/*  Datos de navegación (Añadido el campo 'id' para TypeScript)        */
+/*  Datos de navegación                                                */
 /* ------------------------------------------------------------------ */
 const navLinks = [
   { name: 'Inicio', href: '/', id: 'inicio' },
@@ -66,33 +67,47 @@ const focusRing =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
 
 export default function Navbar() {
+  const pathname = usePathname(); // <-- Hook de Next.js para leer la URL actual
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSpecOpen, setMobileSpecOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
-  // SOLUCIÓN: Definimos explícitamente que hovered puede ser string o null
   const [hovered, setHovered] = useState<string | null>(null);
   
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('inicio');
 
-  /* Header compacto + "Inicio" activo al estar arriba */
+  /* Efecto 1: Header compacto al bajar + Manejo del estado Activo inicial según la URL */
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 16);
-      if (window.scrollY < 120) setActive('inicio');
+      if (pathname === '/' && window.scrollY < 120) setActive('inicio');
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [pathname]);
 
-  /* Resalta el link de la sección que se está viendo */
+  /* Efecto 2: Marcar ruta activa si navegamos a una PÁGINA distinta (ej: /calculo, /fonasa) */
+  useEffect(() => {
+    if (pathname && pathname !== '/') {
+      const currentLink = navLinks.find((link) => link.href !== '/' && pathname.startsWith(link.href));
+      if (currentLink) {
+        setActive(currentLink.id);
+      } else {
+        setActive('');
+      }
+    } else if (pathname === '/') {
+      if (window.scrollY < 120) setActive('inicio');
+    }
+  }, [pathname]);
+
+  /* Efecto 3: Resalta el link haciendo SCROLL solo si la sección existe en la vista (ej: Home) */
   useEffect(() => {
     const sections = navLinks
       .filter((l) => l.id !== 'inicio')
       .map((l) => document.getElementById(l.id))
-      // SOLUCIÓN: Le decimos a TypeScript que filtramos los nulos y solo dejamos HTMLElements
       .filter((s): s is HTMLElement => s !== null); 
       
     if (!sections.length) return;
@@ -107,14 +122,13 @@ export default function Navbar() {
     );
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]); // <-- Le pasamos pathname para que se recalcule al cambiar de página
 
   /* Bloquea el scroll del fondo con el menú móvil abierto y lo cierra al pasar a escritorio */
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     const mq = window.matchMedia('(min-width: 1280px)');
     
-    // SOLUCIÓN: Tipado estricto del evento
     const onChange = (e: MediaQueryListEvent) => e.matches && setMobileOpen(false);
     mq.addEventListener('change', onChange);
     return () => {
