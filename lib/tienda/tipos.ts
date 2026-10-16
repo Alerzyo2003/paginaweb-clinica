@@ -50,6 +50,8 @@ export type Pedido = {
   cliente_email: string | null;
   metodo_pago: MetodoPago;
   nota: string | null;
+  /** Día en que el cliente viene a retirar ("2026-10-17"). Los pedidos antiguos no lo tienen. */
+  fecha_retiro: string | null;
   items: ItemPedido[];
   total: number;
   estado: EstadoPedido;
