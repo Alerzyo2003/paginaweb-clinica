@@ -23,7 +23,7 @@ import {
 import { supabasePublico } from '@/lib/supabase';
 import { carrito, maximoPermitido, useCarrito, type LineaCarrito } from '@/lib/tienda/carrito';
 import { hayDatosTransferencia, linkWhatsApp, TIENDA } from '@/lib/tienda/config';
-import { diasDeRetiro, fechaLarga, horarioDelDia } from '@/lib/tienda/retiro';
+import { fechaLarga, horarioDelDia, mesesDe, semanasDeRetiro } from '@/lib/tienda/retiro';
 import { precio } from '@/lib/tienda/formato';
 import type { MetodoPago } from '@/lib/tienda/tipos';
 import ImagenProducto from './ImagenProducto';
@@ -358,7 +358,8 @@ function PasoDatos({
   const [metodo, setMetodo] = useState<MetodoPago | null>(null);
   const [nota, setNota] = useState('');
   // La lista de días se calcula una vez al abrir el formulario.
-  const [dias] = useState(() => diasDeRetiro());
+  const [semanas] = useState(() => semanasDeRetiro());
+  const primerDia = semanas.flat().find((c) => c.disponible)?.iso;
   const [fechaRetiro, setFechaRetiro] = useState<string | null>(null);
   // Los errores se muestran desde el primer intento y se actualizan mientras escribes.
   const [intentado, setIntentado] = useState(false);
@@ -518,35 +519,68 @@ function PasoDatos({
           aria-describedby={`${id}-retiro-ayuda${errores.retiro ? ` ${id}-retiro-error` : ''}`}
         >
           <legend className="text-[14.5px] font-bold text-[#0F2950]">¿Qué día vienes a retirar?</legend>
-          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden">
-            {dias.map((d, i) => {
-              const elegido = fechaRetiro === d.iso;
-              return (
-                <label
-                  key={d.iso}
-                  className={`relative flex h-[62px] w-[66px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0A9BB8] has-[:focus-visible]:ring-offset-2 ${
-                    elegido
-                      ? 'border-[#0A9BB8] bg-[#0A9BB8] text-white'
-                      : errores.retiro
-                        ? 'border-[#F0B8C8] bg-white text-[#071B3A]'
-                        : 'border-[#E3EBF3] bg-white text-[#071B3A] hover:border-[#C5D4E3]'
-                  }`}
-                >
-                  <input
-                    id={i === 0 ? `${id}-retiro` : undefined}
-                    type="radio"
-                    name={`${id}-dia`}
-                    value={d.iso}
-                    checked={elegido}
-                    onChange={() => setFechaRetiro(d.iso)}
-                    aria-label={fechaLarga(d.iso)}
-                    className="sr-only"
-                  />
-                  <span className={`text-[12.5px] font-bold ${elegido ? 'text-white/85' : 'text-slate-500'}`}>{d.arriba}</span>
-                  <span className="mt-0.5 text-[15px] font-black tabular-nums">{d.abajo}</span>
-                </label>
-              );
-            })}
+          <div
+            className={`mt-2 rounded-[20px] bg-white p-3 ring-1 sm:p-4 ${errores.retiro ? 'ring-2 ring-[#F0B8C8]' : 'ring-[#E3EBF3]'}`}
+          >
+            <div className="flex items-baseline justify-between gap-3 px-0.5">
+              <span className="text-[14.5px] font-extrabold capitalize text-[#071B3A]">{mesesDe(semanas)}</span>
+              <span className="text-[12.5px] font-semibold text-slate-500">Domingo cerrado</span>
+            </div>
+            <div className="mt-2.5 grid grid-cols-6 gap-1.5 text-center text-[12px] font-bold text-slate-500" aria-hidden="true">
+              {['lun', 'mar', 'mié', 'jue', 'vie', 'sáb'].map((d) => (
+                <span key={d}>{d}</span>
+              ))}
+            </div>
+            {semanas.map((semana) => (
+              <div key={semana[0].iso} className="mt-1.5 grid grid-cols-6 gap-1.5">
+                {semana.map((c) => {
+                  if (!c.disponible) {
+                    return (
+                      <span
+                        key={c.iso}
+                        aria-hidden="true"
+                        className="flex h-12 flex-col items-center justify-center rounded-xl text-[15px] font-bold tabular-nums text-slate-300"
+                      >
+                        {c.numero}
+                        {(c.esHoy || c.mes) && (
+                          <span className={`text-[10.5px] font-bold leading-none ${c.esHoy ? 'text-slate-500' : ''}`}>
+                            {c.esHoy ? 'hoy' : c.mes}
+                          </span>
+                        )}
+                      </span>
+                    );
+                  }
+                  const elegido = fechaRetiro === c.iso;
+                  return (
+                    <label
+                      key={c.iso}
+                      className={`relative flex h-12 cursor-pointer flex-col items-center justify-center rounded-xl text-[16px] font-black tabular-nums transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0A9BB8] has-[:focus-visible]:ring-offset-2 ${
+                        elegido
+                          ? 'bg-[#0A9BB8] text-white shadow-[0_6px_14px_-6px_rgba(10,155,184,0.9)]'
+                          : 'bg-[#F1F6FA] text-[#071B3A] hover:bg-[#DDF1F6]'
+                      }`}
+                    >
+                      <input
+                        id={c.iso === primerDia ? `${id}-retiro` : undefined}
+                        type="radio"
+                        name={`${id}-dia`}
+                        value={c.iso}
+                        checked={elegido}
+                        onChange={() => setFechaRetiro(c.iso)}
+                        aria-label={fechaLarga(c.iso)}
+                        className="sr-only"
+                      />
+                      {c.numero}
+                      {c.mes && (
+                        <span className={`text-[10.5px] font-bold leading-none ${elegido ? 'text-white/85' : 'text-slate-500'}`}>
+                          {c.mes}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            ))}
           </div>
           <p id={`${id}-retiro-ayuda`} className="mt-2 flex items-start gap-2 text-[13.5px] leading-snug text-slate-600">
             <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#07758C]" aria-hidden="true" />
