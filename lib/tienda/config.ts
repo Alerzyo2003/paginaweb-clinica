@@ -14,6 +14,19 @@ export const TIENDA = {
   /** Días hábiles que guardas un pedido antes de liberarlo. */
   diasReserva: 3,
 
+  /** Para que el cliente elija qué día viene a retirar (domingo siempre cerrado). */
+  retiro: {
+    abre: '8:30',
+    cierraSemana: '19:30',
+    cierraSabado: '17:00',
+    /** Cuántos días con atención se muestran para elegir. */
+    diasParaElegir: 12,
+    /** "Hoy" deja de aparecer cuando falta menos que esto para cerrar. */
+    minutosParaPreparar: 60,
+    /** Feriados u otros días cerrados, como '2026-12-25'. */
+    diasCerrados: [] as string[],
+  },
+
   /**
    * Datos para transferir. El cliente puede usar cualquiera de las cuentas.
    * Si dejas la lista vacía, la tienda le dice que le enviarán los datos por WhatsApp.
