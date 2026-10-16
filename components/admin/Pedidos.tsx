@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Banknote, CircleAlert, Landmark, LoaderCircle, MessageCircle, RefreshCw } from 'lucide-react';
+import { Banknote, ChevronDown, CircleAlert, Landmark, LoaderCircle, MessageCircle, RefreshCw } from 'lucide-react';
 import { fechaHora, precio, telefono } from '@/lib/tienda/formato';
+import { linkMensaje, mensajeSugerido, plantilla, PLANTILLAS, telefonoWhatsApp } from '@/lib/tienda/mensajes';
 import type { EstadoPedido, Pedido } from '@/lib/tienda/tipos';
-import { botonSuave, foco, tarjeta } from './ui';
+import { botonOscuro, botonSuave, foco, tarjeta } from './ui';
 
 const ESTADOS: { id: EstadoPedido; nombre: string; fondo: string; texto: string }[] = [
   { id: 'pendiente', nombre: 'Pendiente', fondo: '#FDF3DD', texto: '#8F5E05' },
@@ -26,12 +27,6 @@ type FiltroId = (typeof FILTROS)[number]['id'];
 
 function traerPedidos(db: SupabaseClient) {
   return db.from('tienda_pedidos').select('*').order('created_at', { ascending: false }).limit(300);
-}
-
-/** Teléfono guardado ("912345678") → número para wa.me ("56912345678"). */
-function telefonoWhatsApp(telefono: string) {
-  const d = telefono.replace(/\D/g, '');
-  return d.startsWith('56') ? d : `56${d}`;
 }
 
 export default function Pedidos({
@@ -180,6 +175,7 @@ function TarjetaPedido({ pedido: p, onEstado }: { pedido: Pedido; onEstado: (e: 
   const estado = ESTADOS.find((e) => e.id === p.estado) ?? ESTADOS[0];
   const transferencia = p.metodo_pago === 'transferencia';
   const mensaje = `Hola ${p.cliente_nombre.split(' ')[0]}, te escribimos de Clínica Dignidad por tu pedido N° ${p.numero}.`;
+  const sugerido = mensajeSugerido(p);
 
   return (
     <li className={`${tarjeta} flex flex-col p-5`}>
@@ -258,6 +254,42 @@ function TarjetaPedido({ pedido: p, onEstado }: { pedido: Pedido; onEstado: (e: 
           {transferencia ? 'Transferencia' : 'Pago al retirar'}
         </span>
         <span className="text-[20px] font-black tabular-nums text-[#071B3A]">{precio(p.total)}</span>
+      </div>
+
+      {/* Mensajes listos para WhatsApp */}
+      <div className="mt-4 border-t border-[#EEF3F8] pt-4">
+        <a
+          href={linkMensaje(p, sugerido)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${botonOscuro} w-full`}
+        >
+          <MessageCircle className="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true" />
+          <span className="truncate">{plantilla(sugerido).nombre}</span>
+        </a>
+        <details className="group mt-2">
+          <summary
+            className={`flex h-10 cursor-pointer list-none items-center justify-center gap-1.5 rounded-full text-[14px] font-bold text-[#07758C] hover:bg-[#F3F7FB] [&::-webkit-details-marker]:hidden ${foco}`}
+          >
+            Otros mensajes
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {PLANTILLAS.filter((m) => m.id !== sugerido).map((m) => (
+              <li key={m.id}>
+                <a
+                  href={linkMensaje(p, m.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex h-10 items-center gap-1.5 rounded-full border border-[#D5E0EB] bg-white px-3.5 text-[13.5px] font-bold text-[#0F2950] transition-colors hover:border-[#0F2950] ${foco}`}
+                >
+                  <MessageCircle className="h-4 w-4 text-[#07758C]" aria-hidden="true" />
+                  {m.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
       </div>
     </li>
   );
