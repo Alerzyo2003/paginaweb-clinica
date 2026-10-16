@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Banknote, ChevronDown, CircleAlert, Landmark, LoaderCircle, MessageCircle, RefreshCw } from 'lucide-react';
+import { Banknote, CalendarDays, ChevronDown, CircleAlert, Landmark, LoaderCircle, MessageCircle, RefreshCw } from 'lucide-react';
 import { fechaHora, precio, telefono } from '@/lib/tienda/formato';
+import { fechaCorta, hoyEnChile } from '@/lib/tienda/retiro';
 import { linkMensaje, mensajeSugerido, plantilla, PLANTILLAS, telefonoWhatsApp } from '@/lib/tienda/mensajes';
 import type { EstadoPedido, Pedido } from '@/lib/tienda/tipos';
 import { botonOscuro, botonSuave, foco, tarjeta } from './ui';
@@ -96,6 +97,20 @@ export default function Pedidos({
     if (anterior === 'cancelado' || estado === 'cancelado') onStockCambiado();
   };
 
+  const cambiarFecha = async (pedido: Pedido, fecha: string | null) => {
+    const anterior = pedido.fecha_retiro;
+    const poner = (f: string | null) =>
+      setPedidos((lista) => lista?.map((p) => (p.id === pedido.id ? { ...p, fecha_retiro: f } : p)) ?? null);
+    poner(fecha);
+    const { error: err } = await db.from('tienda_pedidos').update({ fecha_retiro: fecha }).eq('id', pedido.id);
+    if (err) {
+      poner(anterior);
+      setError(`No se pudo cambiar el día de retiro del pedido N° ${pedido.numero}.`);
+      return;
+    }
+    setError('');
+  };
+
   return (
     <section aria-labelledby="titulo-pedidos">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -163,7 +178,7 @@ export default function Pedidos({
       ) : (
         <ul className="mt-6 grid gap-4 lg:grid-cols-2">
           {filtrados.map((p) => (
-            <TarjetaPedido key={p.id} pedido={p} onEstado={(e) => cambiarEstado(p, e)} />
+            <TarjetaPedido key={p.id} pedido={p} onEstado={(e) => cambiarEstado(p, e)} onFecha={(f) => cambiarFecha(p, f)} />
           ))}
         </ul>
       )}
@@ -171,7 +186,15 @@ export default function Pedidos({
   );
 }
 
-function TarjetaPedido({ pedido: p, onEstado }: { pedido: Pedido; onEstado: (e: EstadoPedido) => void }) {
+function TarjetaPedido({
+  pedido: p,
+  onEstado,
+  onFecha,
+}: {
+  pedido: Pedido;
+  onEstado: (e: EstadoPedido) => void;
+  onFecha: (fecha: string | null) => void;
+}) {
   const estado = ESTADOS.find((e) => e.id === p.estado) ?? ESTADOS[0];
   const transferencia = p.metodo_pago === 'transferencia';
   const mensaje = `Hola ${p.cliente_nombre.split(' ')[0]}, te escribimos de Clínica Dignidad por tu pedido N° ${p.numero}.`;
@@ -224,6 +247,8 @@ function TarjetaPedido({ pedido: p, onEstado }: { pedido: Pedido; onEstado: (e: 
         </a>
         {p.cliente_email && <span className="text-slate-500">{p.cliente_email}</span>}
       </div>
+
+      <DiaRetiro pedido={p} onFecha={onFecha} />
 
       <ul className="mt-4 divide-y divide-[#EEF3F8] rounded-2xl bg-[#F7FAFD] px-4 text-[14.5px]">
         {p.items.map((item) => (
@@ -292,5 +317,47 @@ function TarjetaPedido({ pedido: p, onEstado }: { pedido: Pedido; onEstado: (e: 
         </details>
       </div>
     </li>
+  );
+}
+
+/** Día en que el cliente dijo que viene. Se puede cambiar si avisa otro día. */
+function DiaRetiro({ pedido: p, onFecha }: { pedido: Pedido; onFecha: (fecha: string | null) => void }) {
+  const hoy = hoyEnChile();
+  const activo = p.estado !== 'entregado' && p.estado !== 'cancelado';
+  const f = p.fecha_retiro;
+  const tono = !f
+    ? 'bg-slate-100 text-slate-600'
+    : activo && f === hoy
+      ? 'bg-[#FDB92B] text-[#071B3A]'
+      : activo && f < hoy
+        ? 'bg-[#FBE7ED] text-[#8E1239]'
+        : 'bg-[#EDF4E2] text-[#3B5A17]';
+  const texto = !f ? 'Sin día' : activo && f < hoy ? `${fechaCorta(f)} (ya pasó)` : fechaCorta(f);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-[14px]">
+      <span className="inline-flex items-center gap-1.5 font-bold text-slate-600">
+        <CalendarDays className="h-4 w-4 text-[#07758C]" aria-hidden="true" />
+        Retira
+      </span>
+      <span className={`rounded-full px-3 py-1 text-[13.5px] font-extrabold first-letter:uppercase ${tono}`}>{texto}</span>
+      <label className={`relative inline-flex h-8 cursor-pointer items-center rounded-full px-3 text-[13px] font-bold text-[#07758C] hover:bg-[#F3F7FB] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0A9BB8]`}>
+        Cambiar
+        <input
+          type="date"
+          value={f ?? ''}
+          onChange={(e) => onFecha(e.target.value || null)}
+          onClick={(e) => {
+            try {
+              e.currentTarget.showPicker?.();
+            } catch {
+              /* algunos navegadores no lo permiten; el campo igual se puede escribir */
+            }
+          }}
+          aria-label={`Cambiar día de retiro del pedido N° ${p.numero}`}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        />
+      </label>
+    </div>
   );
 }
