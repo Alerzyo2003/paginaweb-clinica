@@ -9,7 +9,7 @@ export const TIENDA = {
 
   direccion: 'Av. Venancia Leiva 1871, La Pintana',
   mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Av.+Venancia+Leiva+1871,+La+Pintana',
-  horario: ['Lunes a viernes de 8:30 a 19:00', 'Sábado de 8:30 a 17:00'],
+  horario: ['Lunes a viernes de 8:30 a 19:30', 'Sábado de 8:30 a 17:00'],
 
   /** Días hábiles que guardas un pedido antes de liberarlo. */
   diasReserva: 3,
