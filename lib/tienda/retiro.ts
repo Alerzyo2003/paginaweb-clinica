@@ -11,12 +11,14 @@ const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', '
 const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-export type DiaRetiro = {
+/** Un casillero del calendario de retiro (lunes a sábado). */
+export type CeldaRetiro = {
   iso: string;
-  /** "Hoy", "Mañana" o "lun" */
-  arriba: string;
-  /** "19 oct" */
-  abajo: string;
+  numero: number;
+  /** "oct" en el primer casillero y cuando cambia el mes. */
+  mes: string | null;
+  disponible: boolean;
+  esHoy: boolean;
 };
 
 /** Fecha y minutos del día ahora en Chile. */
@@ -71,23 +73,60 @@ export function horarioDelDia(iso: string) {
   return cierre ? `de ${TIENDA.retiro.abre} a ${cierre}` : '';
 }
 
-/** Próximos días con atención. Hoy aparece solo si queda tiempo para preparar el pedido. */
-export function diasDeRetiro(ahora = new Date()): DiaRetiro[] {
-  const { iso: hoy, minutos: ahoraMin } = ahoraEnChile(ahora);
-  const dias: DiaRetiro[] = [];
-  for (let i = 0; dias.length < TIENDA.retiro.diasParaElegir && i < 60; i++) {
-    const iso = sumarDias(hoy, i);
-    const cierre = cierreDelDia(iso);
-    if (!cierre) continue;
-    if (i === 0 && ahoraMin > minutos(cierre) - TIENDA.retiro.minutosParaPreparar) continue;
-    const d = aFecha(iso);
-    dias.push({
-      iso,
-      arriba: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : DIAS_CORTOS[d.getUTCDay()],
-      abajo: `${d.getUTCDate()} ${MESES[d.getUTCMonth()].slice(0, 3)}`,
-    });
+function disponible(iso: string, hoy: string, ahoraMin: number) {
+  const cierre = cierreDelDia(iso);
+  if (!cierre || iso < hoy) return false;
+  if (iso === hoy) {
+    return TIENDA.retiro.permitirHoy && ahoraMin <= minutos(cierre) - TIENDA.retiro.minutosParaPreparar;
   }
-  return dias;
+  return true;
+}
+
+/**
+ * Semanas de lunes a sábado para el calendario de retiro. Parte en la semana
+ * del primer día disponible y agrega semanas hasta tener suficientes días.
+ */
+export function semanasDeRetiro(ahora = new Date()): CeldaRetiro[][] {
+  const { iso: hoy, minutos: ahoraMin } = ahoraEnChile(ahora);
+
+  let primero = hoy;
+  for (let i = 0; i < 30 && !disponible(primero, hoy, ahoraMin); i++) primero = sumarDias(primero, 1);
+
+  const dia = diaSemana(primero); // 0 = domingo
+  let lunes = sumarDias(primero, dia === 0 ? 1 : 1 - dia);
+
+  const semanas: CeldaRetiro[][] = [];
+  let disponibles = 0;
+  let mesAnterior = -1;
+  while ((disponibles < TIENDA.retiro.diasParaElegir || semanas.length < 2) && semanas.length < 6) {
+    const semana: CeldaRetiro[] = [];
+    for (let i = 0; i < 6; i++) {
+      const iso = sumarDias(lunes, i);
+      const d = aFecha(iso);
+      const libre = disponible(iso, hoy, ahoraMin);
+      if (libre) disponibles++;
+      const mesDeEste = d.getUTCMonth();
+      semana.push({
+        iso,
+        numero: d.getUTCDate(),
+        // El mes se muestra en el primer casillero y cuando cambia.
+        mes: d.getUTCMonth() !== mesAnterior ? MESES[d.getUTCMonth()].slice(0, 3) : null,
+        disponible: libre,
+        esHoy: iso === hoy,
+      });
+      mesAnterior = mesDeEste;
+    }
+    semanas.push(semana);
+    lunes = sumarDias(lunes, 7);
+  }
+  return semanas;
+}
+
+/** "octubre" o "octubre – noviembre" */
+export function mesesDe(semanas: CeldaRetiro[][]) {
+  const primero = aFecha(semanas[0][0].iso).getUTCMonth();
+  const ultimo = aFecha(semanas.at(-1)!.at(-1)!.iso).getUTCMonth();
+  return primero === ultimo ? MESES[primero] : `${MESES[primero]} – ${MESES[ultimo]}`;
 }
 
 /** "sábado 17 de octubre" */
