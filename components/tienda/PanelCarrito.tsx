@@ -6,9 +6,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   Banknote,
+  CalendarCheck,
   Check,
   CircleAlert,
-  Clock,
   Copy,
   Landmark,
   LoaderCircle,
@@ -23,7 +23,7 @@ import {
 import { supabasePublico } from '@/lib/supabase';
 import { carrito, maximoPermitido, useCarrito, type LineaCarrito } from '@/lib/tienda/carrito';
 import { hayDatosTransferencia, linkWhatsApp, TIENDA } from '@/lib/tienda/config';
-import { horarioEnTexto } from '@/lib/tienda/mensajes';
+import { diasDeRetiro, fechaLarga, horarioDelDia } from '@/lib/tienda/retiro';
 import { precio } from '@/lib/tienda/formato';
 import type { MetodoPago } from '@/lib/tienda/tipos';
 import ImagenProducto from './ImagenProducto';
@@ -36,6 +36,7 @@ type Confirmado = {
   total: number;
   metodo: MetodoPago;
   nombre: string;
+  fechaRetiro: string;
   lineas: LineaCarrito[];
 };
 
@@ -339,7 +340,7 @@ function LineaCarritoItem({ linea, onNavegar }: { linea: LineaCarrito; onNavegar
 /*  Paso 2: datos y forma de pago                                      */
 /* ================================================================== */
 
-type Errores = Partial<Record<'nombre' | 'telefono' | 'email' | 'metodo', string>>;
+type Errores = Partial<Record<'nombre' | 'telefono' | 'email' | 'metodo' | 'retiro', string>>;
 
 function PasoDatos({
   items,
@@ -356,6 +357,9 @@ function PasoDatos({
   const [email, setEmail] = useState('');
   const [metodo, setMetodo] = useState<MetodoPago | null>(null);
   const [nota, setNota] = useState('');
+  // La lista de días se calcula una vez al abrir el formulario.
+  const [dias] = useState(() => diasDeRetiro());
+  const [fechaRetiro, setFechaRetiro] = useState<string | null>(null);
   // Los errores se muestran desde el primer intento y se actualizan mientras escribes.
   const [intentado, setIntentado] = useState(false);
   const [errorGeneral, setErrorGeneral] = useState('');
@@ -368,6 +372,7 @@ function PasoDatos({
     if (digitos.length < 8 || digitos.length > 12) e.telefono = 'Escribe un teléfono de 8 a 12 números.';
     if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) e.email = 'Revisa tu correo.';
     if (!metodo) e.metodo = 'Elige cómo vas a pagar.';
+    if (!fechaRetiro) e.retiro = 'Elige qué día vienes a retirar.';
     return e;
   };
   const errores: Errores = intentado ? validar() : {};
@@ -377,9 +382,10 @@ function PasoDatos({
     const e = validar();
     setIntentado(true);
     setErrorGeneral('');
-    if (Object.keys(e).length > 0 || !metodo) {
-      const primero = Object.keys(e)[0];
-      document.getElementById(`${id}-${primero}`)?.focus();
+    if (Object.keys(e).length > 0 || !metodo || !fechaRetiro) {
+      const primero = document.getElementById(`${id}-${Object.keys(e)[0]}`);
+      primero?.focus({ preventScroll: true });
+      primero?.scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
     }
 
@@ -396,6 +402,7 @@ function PasoDatos({
       p_email: email.trim() || null,
       p_metodo_pago: metodo,
       p_nota: nota.trim() || null,
+      p_fecha_retiro: fechaRetiro,
       p_items: items.map((l) => ({ producto_id: l.id, cantidad: l.cantidad })),
     });
     setEnviando(false);
@@ -415,6 +422,7 @@ function PasoDatos({
       total: fila.total_pedido,
       metodo,
       nombre: nombre.trim(),
+      fechaRetiro,
       lineas: items,
     });
   };
@@ -505,6 +513,64 @@ function PasoDatos({
           )}
         </fieldset>
 
+        <fieldset
+          className="min-w-0"
+          aria-describedby={`${id}-retiro-ayuda${errores.retiro ? ` ${id}-retiro-error` : ''}`}
+        >
+          <legend className="text-[14.5px] font-bold text-[#0F2950]">¿Qué día vienes a retirar?</legend>
+          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden">
+            {dias.map((d, i) => {
+              const elegido = fechaRetiro === d.iso;
+              return (
+                <label
+                  key={d.iso}
+                  className={`relative flex h-[62px] w-[66px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0A9BB8] has-[:focus-visible]:ring-offset-2 ${
+                    elegido
+                      ? 'border-[#0A9BB8] bg-[#0A9BB8] text-white'
+                      : errores.retiro
+                        ? 'border-[#F0B8C8] bg-white text-[#071B3A]'
+                        : 'border-[#E3EBF3] bg-white text-[#071B3A] hover:border-[#C5D4E3]'
+                  }`}
+                >
+                  <input
+                    id={i === 0 ? `${id}-retiro` : undefined}
+                    type="radio"
+                    name={`${id}-dia`}
+                    value={d.iso}
+                    checked={elegido}
+                    onChange={() => setFechaRetiro(d.iso)}
+                    aria-label={fechaLarga(d.iso)}
+                    className="sr-only"
+                  />
+                  <span className={`text-[12.5px] font-bold ${elegido ? 'text-white/85' : 'text-slate-500'}`}>{d.arriba}</span>
+                  <span className="mt-0.5 text-[15px] font-black tabular-nums">{d.abajo}</span>
+                </label>
+              );
+            })}
+          </div>
+          <p id={`${id}-retiro-ayuda`} className="mt-2 flex items-start gap-2 text-[13.5px] leading-snug text-slate-600">
+            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#07758C]" aria-hidden="true" />
+            <span>
+              {fechaRetiro ? (
+                <>
+                  Te esperamos el <strong className="text-[#0F2950]">{fechaLarga(fechaRetiro)}</strong>,{' '}
+                  {horarioDelDia(fechaRetiro)}, en {TIENDA.direccion}.
+                </>
+              ) : (
+                <>
+                  En {TIENDA.direccion}. Lunes a viernes de {TIENDA.retiro.abre} a {TIENDA.retiro.cierraSemana} y sábado
+                  de {TIENDA.retiro.abre} a {TIENDA.retiro.cierraSabado}.
+                </>
+              )}
+            </span>
+          </p>
+          {errores.retiro && (
+            <p id={`${id}-retiro-error`} className="mt-1.5 text-[13.5px] font-semibold text-[#B01C48]">
+              {errores.retiro}
+            </p>
+          )}
+        </fieldset>
+
         <Campo id={`${id}-nota`} etiqueta="Comentario" opcional>
           <textarea
             id={`${id}-nota`}
@@ -512,19 +578,10 @@ function PasoDatos({
             onChange={(e) => setNota(e.target.value)}
             rows={2}
             maxLength={500}
-            placeholder="Ej: lo retiro el sábado en la mañana"
+            placeholder="Ej: paso después de las 17:00"
             className={`${claseInput(false)} h-auto resize-none py-3`}
           />
         </Campo>
-
-        <div className="rounded-[20px] bg-white p-4 text-[14px] text-slate-600 ring-1 ring-[#E3EBF3]">
-          <p className="flex items-start gap-2.5">
-            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#07758C]" aria-hidden="true" />
-            <span>
-              Retiras en <strong className="text-[#0F2950]">{TIENDA.direccion}</strong>
-            </span>
-          </p>
-        </div>
       </div>
 
       <div className="border-t border-[#E3EBF3] bg-white px-4 pb-5 pt-4 sm:px-5">
@@ -669,8 +726,7 @@ function mensajeWhatsApp(p: Confirmado) {
         ? 'Pago: transferencia. Les envío el comprobante.'
         : 'Pago: transferencia. ¿Me envían los datos para transferir?'
       : 'Pago: al retirar en la clínica.';
-  // Termina en el día de retiro para que el cliente solo tenga que escribirlo.
-  return `Hola, hice el pedido N° ${p.numero} en la tienda de la web.\n\n${lineas}\n\nTotal: ${precio(p.total)}\n${pago}\nNombre: ${p.nombre}\n\nQuiero retirarlo el día: `;
+  return `Hola, hice el pedido N° ${p.numero} en la tienda de la web.\n\n${lineas}\n\nTotal: ${precio(p.total)}\n${pago}\nRetiro: ${fechaLarga(p.fechaRetiro)}\nNombre: ${p.nombre}`;
 }
 
 function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => void }) {
@@ -693,6 +749,22 @@ function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => v
           <p className="mt-4 text-[22px] font-black text-[#071B3A]">Pedido N° {pedido.numero}</p>
           <p className="mt-1 text-[15px] text-slate-600">
             Gracias, {pedido.nombre.split(' ')[0]}. Ya lo tenemos registrado.
+          </p>
+        </div>
+
+        <div className="mt-6 flex items-start gap-3 rounded-[24px] bg-[#EDF4E2] p-4 sm:p-5">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-[#4A711D]">
+            <CalendarCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <p className="min-w-0 text-[14px] leading-snug text-[#3B5A17]">
+            <span className="block font-bold">Te esperamos el</span>
+            <span className="block text-[17px] font-black text-[#22370A]">{fechaLarga(pedido.fechaRetiro)}</span>
+            <span className="mt-1 block">
+              {horarioDelDia(pedido.fechaRetiro)} en{' '}
+              <a href={TIENDA.mapsUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-2">
+                {TIENDA.direccion}
+              </a>
+            </span>
           </p>
         </div>
 
@@ -733,9 +805,8 @@ function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => v
                   <DatoCopiable etiqueta="Comentario" valor={`Pedido ${pedido.numero}`} />
                 </dl>
                 <p className="mt-3 text-[13.5px] leading-relaxed text-slate-600">
-                  Escribe <strong>Pedido {pedido.numero}</strong> en el comentario de la transferencia. Luego
-                  envíanos el comprobante por WhatsApp y cuéntanos qué día vienes a retirarlo
-                  ({horarioEnTexto()}).
+                  Escribe <strong>Pedido {pedido.numero}</strong> en el comentario de la transferencia y luego
+                  envíanos el comprobante por WhatsApp.
                 </p>
               </>
             ) : (
@@ -750,20 +821,9 @@ function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => v
               <Banknote className="h-5 w-5 text-[#07758C]" aria-hidden="true" />
               Pagas {precio(pedido.total)} al retirar
             </h3>
-            <ul className="mt-3 space-y-2.5 text-[14.5px] text-slate-600">
-              <li className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#07758C]" aria-hidden="true" />
-                <a href={TIENDA.mapsUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#0F2950] underline underline-offset-2">
-                  {TIENDA.direccion}
-                </a>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#07758C]" aria-hidden="true" />
-                <span>{TIENDA.horario.join('. ')}.</span>
-              </li>
-            </ul>
-            <p className="mt-3 text-[13.5px] text-slate-600">
-              Guardamos tu pedido {TIENDA.diasReserva} días hábiles. Menciona el N° {pedido.numero} en recepción.
+            <p className="mt-2 text-[14px] leading-relaxed text-slate-600">
+              Pagas en recepción cuando vengas. Menciona el N° {pedido.numero}. Si no puedes venir ese día,
+              avísanos por WhatsApp: guardamos tu pedido {TIENDA.diasReserva} días hábiles.
             </p>
           </section>
         )}
