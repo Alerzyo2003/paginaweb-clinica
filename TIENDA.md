@@ -45,7 +45,7 @@ En **Vercel → tu proyecto → Settings → Environment Variables** agrega las 
 
 Edita [`lib/tienda/config.ts`](lib/tienda/config.ts):
 
-- `transferencia`: titular, RUT, banco, tipo y número de cuenta, correo. Mientras el número de cuenta esté vacío, la tienda le dice al cliente que le enviarán los datos por WhatsApp.
+- `transferencia`: titular (razón social), RUT, correo y la lista de `cuentas` (banco, tipo y número). El cliente puede transferir a cualquiera. Si la lista queda vacía, la tienda le dice que le enviarán los datos por WhatsApp.
 - `diasReserva`, `horario`, `direccion` y `whatsapp`, si cambian.
 
 ### 5. Cargar productos
@@ -55,7 +55,8 @@ Entra a `https://tu-sitio/admin`, inicia sesión y usa **Nuevo producto**. Las f
 ## Uso diario
 
 - **Pedidos**: cada pedido parte en *Pendiente*. Cámbialo a *Pagado* cuando llegue la transferencia (revísala en la cartola, no solo en la captura), *Listo para retirar* cuando esté separado, y *Entregado* o *Cancelado* al final. El teléfono del cliente abre WhatsApp con un mensaje listo.
-- **Agotado**: el producto se sigue viendo pero no se puede comprar.
+- **Stock**: cada producto tiene sus unidades disponibles. Se descuentan solas cuando llega un pedido y vuelven si lo cancelas (o si lo reactivas, se descuentan de nuevo). En la lista usa **+** y **−** para ajustes rápidos, o escribe el número exacto al editar el producto. La tienda no deja pedir más unidades de las que hay y avisa cuando quedan pocas.
+- **Agotado**: es automático. Con 0 unidades el producto se sigue viendo, pero no se puede comprar.
 - **Oculto** (Visible apagado): desaparece de la tienda sin borrarlo.
 - **Destacado**: aparece primero en el catálogo.
 - **Oferta**: llena "Precio antes de la oferta" y la tienda muestra el precio tachado.
@@ -70,6 +71,8 @@ Entra a `https://tu-sitio/admin`, inicia sesión y usa **Nuevo producto**. Las f
 | Panel de admin | `app/admin/`, `components/admin/` |
 | Configuración, tipos, categorías y carrito | `lib/tienda/` |
 
-**Seguridad**: el navegador nunca decide el precio. La función `tienda_crear_pedido` recalcula precios y total desde la base de datos, rechaza productos ocultos o agotados y limita los pedidos repetidos desde un mismo teléfono. Los productos solo los editan usuarios de `tienda_admins`, y los pedidos solo los ven ellos.
+**Seguridad**: el navegador nunca decide el precio. La función `tienda_crear_pedido` recalcula precios y total desde la base de datos, revisa y descuenta el stock (bloqueando la fila para que dos personas no compren la misma última unidad), rechaza productos ocultos o agotados y limita los pedidos repetidos desde un mismo teléfono.
+
+**Si ya tenías la tienda instalada**: vuelve a ejecutar `supabase/tienda.sql` completo. Agrega el stock sin borrar nada; los productos que ya existían quedan con 0 unidades hasta que les pongas su cantidad, y los pedidos anteriores no mueven el stock. Los productos solo los editan usuarios de `tienda_admins`, y los pedidos solo los ven ellos.
 
 Para agregar o renombrar categorías hay que cambiar `lib/tienda/categorias.ts` y la lista `categoria in (...)` de `supabase/tienda.sql`.

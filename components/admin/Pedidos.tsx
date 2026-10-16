@@ -37,9 +37,12 @@ function telefonoWhatsApp(telefono: string) {
 export default function Pedidos({
   db,
   onPendientes,
+  onStockCambiado,
 }: {
   db: SupabaseClient;
   onPendientes: (n: number) => void;
+  /** Avisa que el stock pudo cambiar (pedidos nuevos o cancelados). */
+  onStockCambiado: () => void;
 }) {
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null);
   const [error, setError] = useState('');
@@ -68,6 +71,7 @@ export default function Pedidos({
     }
     setError('');
     setPedidos(data as Pedido[]);
+    onStockCambiado();
   };
 
   const pendientes = pedidos?.filter((p) => p.estado === 'pendiente').length ?? 0;
@@ -86,8 +90,15 @@ export default function Pedidos({
     const { error: err } = await db.from('tienda_pedidos').update({ estado }).eq('id', pedido.id);
     if (err) {
       setPedidos((lista) => lista?.map((p) => (p.id === pedido.id ? { ...p, estado: anterior } : p)) ?? null);
-      setError(`No se pudo cambiar el estado del pedido N° ${pedido.numero}.`);
+      setError(
+        err.code === 'P0001'
+          ? `Pedido N° ${pedido.numero}: ${err.message}`
+          : `No se pudo cambiar el estado del pedido N° ${pedido.numero}.`,
+      );
+      return;
     }
+    setError('');
+    if (anterior === 'cancelado' || estado === 'cancelado') onStockCambiado();
   };
 
   return (
@@ -127,6 +138,10 @@ export default function Pedidos({
           );
         })}
       </div>
+
+      <p className="mt-3 text-[13.5px] text-slate-500">
+        Cada pedido descuenta su stock al llegar. Si lo cancelas, los productos vuelven al stock.
+      </p>
 
       {error && (
         <p role="alert" className="mt-4 flex items-start gap-2 rounded-2xl bg-[#FBE7ED] px-4 py-3 text-[14.5px] font-semibold text-[#8E1239]">

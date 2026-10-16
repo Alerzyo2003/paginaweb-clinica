@@ -1,7 +1,7 @@
 'use client';
 
 import { Minus, Plus, ShoppingBag } from 'lucide-react';
-import { carrito, MAX_POR_PRODUCTO, useCantidadEnCarrito } from '@/lib/tienda/carrito';
+import { carrito, maximoPermitido, useCantidadEnCarrito } from '@/lib/tienda/carrito';
 import type { Producto } from '@/lib/tienda/tipos';
 import { usePanelCarrito } from './PanelCarritoContext';
 
@@ -17,8 +17,9 @@ export default function BotonAgregar({ producto, tamano = 'normal' }: Props) {
   const cantidad = useCantidadEnCarrito(producto.id);
   const { avisarAgregado, abrir } = usePanelCarrito();
   const grande = tamano === 'grande';
+  const maximo = maximoPermitido(producto.stock);
 
-  if (producto.agotado) {
+  if (producto.agotado || maximo === 0) {
     return (
       <span
         className={`inline-flex items-center justify-center rounded-full bg-slate-100 font-bold text-slate-500 ${
@@ -76,8 +77,8 @@ export default function BotonAgregar({ producto, tamano = 'normal' }: Props) {
           carrito.cambiar(producto.id, cantidad + 1);
           avisarAgregado();
         }}
-        disabled={cantidad >= MAX_POR_PRODUCTO}
-        aria-label="Agregar uno más"
+        disabled={cantidad >= maximo}
+        aria-label={cantidad >= maximo ? 'No quedan más unidades disponibles' : 'Agregar uno más'}
         className={`flex items-center justify-center rounded-full transition-colors hover:bg-white/10 disabled:opacity-40 ${foco} ${
           grande ? 'h-10 w-10' : 'h-8 w-8'
         }`}

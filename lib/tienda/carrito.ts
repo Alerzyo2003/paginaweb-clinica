@@ -18,10 +18,16 @@ export type LineaCarrito = {
   imagen_url: string | null;
   categoria: CategoriaId;
   agotado: boolean;
+  stock: number;
   cantidad: number;
 };
 
 export const MAX_POR_PRODUCTO = 20;
+
+/** Cuántas unidades de un producto se pueden tener en el carrito. */
+export function maximoPermitido(stock: number) {
+  return Math.max(0, Math.min(MAX_POR_PRODUCTO, stock));
+}
 const CLAVE = 'dignidad-carrito-v1';
 const VACIO: LineaCarrito[] = [];
 
@@ -45,7 +51,13 @@ function leer() {
   try {
     const crudo = window.localStorage.getItem(CLAVE);
     const datos: unknown = crudo ? JSON.parse(crudo) : [];
-    lineas = Array.isArray(datos) ? datos.filter(esLinea) : VACIO;
+    lineas = Array.isArray(datos)
+      ? datos.filter(esLinea).map((l) => ({
+          ...l,
+          // Carritos guardados antes de que existiera el stock.
+          stock: typeof l.stock === 'number' ? l.stock : MAX_POR_PRODUCTO,
+        }))
+      : VACIO;
   } catch {
     lineas = VACIO;
   }
@@ -95,6 +107,8 @@ export const carrito = {
       carrito.cambiar(p.id, existe.cantidad + cantidad);
       return;
     }
+    const maximo = maximoPermitido(p.stock);
+    if (maximo === 0) return;
     guardar([
       ...lineas,
       {
@@ -106,7 +120,8 @@ export const carrito = {
         imagen_url: p.imagen_url,
         categoria: p.categoria,
         agotado: p.agotado,
-        cantidad: Math.min(Math.max(cantidad, 1), MAX_POR_PRODUCTO),
+        stock: p.stock,
+        cantidad: Math.min(Math.max(cantidad, 1), maximo),
       },
     ]);
   },
@@ -115,7 +130,9 @@ export const carrito = {
     cargar();
     if (cantidad <= 0) return carrito.quitar(id);
     guardar(
-      lineas.map((l) => (l.id === id ? { ...l, cantidad: Math.min(cantidad, MAX_POR_PRODUCTO) } : l)),
+      lineas.map((l) =>
+        l.id === id ? { ...l, cantidad: Math.max(1, Math.min(cantidad, maximoPermitido(l.stock))) } : l,
+      ),
     );
   },
 
@@ -150,11 +167,16 @@ export const carrito = {
         imagen_url: p.imagen_url,
         categoria: p.categoria,
         agotado: p.agotado,
+        stock: p.stock,
+        // Si quedan menos unidades que las del carrito, se ajusta la cantidad.
+        cantidad: p.stock > 0 ? Math.min(l.cantidad, maximoPermitido(p.stock)) : l.cantidad,
       };
       if (
         actualizada.precio !== l.precio ||
         actualizada.nombre !== l.nombre ||
         actualizada.agotado !== l.agotado ||
+        actualizada.stock !== l.stock ||
+        actualizada.cantidad !== l.cantidad ||
         actualizada.imagen_url !== l.imagen_url ||
         actualizada.slug !== l.slug
       ) {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CircleAlert, EyeOff, LoaderCircle, Pencil, Plus, Search, Star } from 'lucide-react';
+import { CircleAlert, EyeOff, LoaderCircle, Minus, Pencil, Plus, Search, Star } from 'lucide-react';
 import ImagenProducto from '@/components/tienda/ImagenProducto';
 import { CATEGORIAS, categoria as datosCategoria } from '@/lib/tienda/categorias';
 import { precio } from '@/lib/tienda/formato';
@@ -18,7 +18,7 @@ function traerProductos(db: SupabaseClient) {
   return db.from('tienda_productos').select('*').order('nombre');
 }
 
-export default function Productos({ db }: { db: SupabaseClient }) {
+export default function Productos({ db, version = 0 }: { db: SupabaseClient; version?: number }) {
   const [productos, setProductos] = useState<Producto[] | null>(null);
   const [error, setError] = useState('');
   const [busqueda, setBusqueda] = useState('');
@@ -42,7 +42,7 @@ export default function Productos({ db }: { db: SupabaseClient }) {
     return () => {
       vigente = false;
     };
-  }, [db]);
+  }, [db, version]);
 
   const visibles = useMemo(() => {
     const q = busqueda.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -57,22 +57,35 @@ export default function Productos({ db }: { db: SupabaseClient }) {
     });
   }, [productos, busqueda, filtro]);
 
-  /** Cambio rápido (visible / agotado) con actualización optimista. */
-  const alternar = async (p: Producto, campo: 'visible' | 'agotado') => {
-    const valor = !p[campo];
+  /** Mostrar u ocultar en la tienda, con actualización optimista. */
+  const alternarVisible = async (p: Producto) => {
+    const valor = !p.visible;
     setGuardandoId(p.id);
-    setProductos((lista) => lista?.map((x) => (x.id === p.id ? { ...x, [campo]: valor } : x)) ?? null);
-    const { error: err } = await db.from('tienda_productos').update({ [campo]: valor }).eq('id', p.id);
+    setProductos((lista) => lista?.map((x) => (x.id === p.id ? { ...x, visible: valor } : x)) ?? null);
+    const { error: err } = await db.from('tienda_productos').update({ visible: valor }).eq('id', p.id);
     setGuardandoId(null);
     if (err) {
-      setProductos((lista) => lista?.map((x) => (x.id === p.id ? { ...x, [campo]: !valor } : x)) ?? null);
+      setProductos((lista) => lista?.map((x) => (x.id === p.id ? { ...x, visible: !valor } : x)) ?? null);
       setError('No se pudo guardar el cambio. Inténtalo de nuevo.');
     }
   };
 
+  /** Botones + y −: suma o resta en la base de datos sin pisar pedidos simultáneos. */
+  const ajustarStock = async (p: Producto, cambio: number) => {
+    setGuardandoId(p.id);
+    const { data, error: err } = await db.rpc('tienda_ajustar_stock', { p_producto: p.id, p_cambio: cambio });
+    setGuardandoId(null);
+    if (err) {
+      setError('No se pudo cambiar el stock. Inténtalo de nuevo.');
+      return;
+    }
+    const stock = Number(data);
+    setProductos((lista) => lista?.map((x) => (x.id === p.id ? { ...x, stock, agotado: stock <= 0 } : x)) ?? null);
+  };
+
   const total = productos?.length ?? 0;
   const ocultos = productos?.filter((p) => !p.visible).length ?? 0;
-  const agotados = productos?.filter((p) => p.agotado).length ?? 0;
+  const sinStock = productos?.filter((p) => p.stock <= 0).length ?? 0;
 
   return (
     <section aria-labelledby="titulo-productos">
@@ -85,7 +98,7 @@ export default function Productos({ db }: { db: SupabaseClient }) {
             <p className="mt-0.5 text-[14.5px] text-slate-600">
               {total} en total
               {ocultos > 0 && `, ${ocultos} ${ocultos === 1 ? 'oculto' : 'ocultos'}`}
-              {agotados > 0 && `, ${agotados} ${agotados === 1 ? 'agotado' : 'agotados'}`}
+              {sinStock > 0 && `, ${sinStock} sin stock`}
             </p>
           )}
         </div>
@@ -152,7 +165,8 @@ export default function Productos({ db }: { db: SupabaseClient }) {
               producto={p}
               guardando={guardandoId === p.id}
               onEditar={() => setEditor({ modo: 'editar', producto: p })}
-              onAlternar={(campo) => alternar(p, campo)}
+              onAlternarVisible={() => alternarVisible(p)}
+              onAjustarStock={(cambio) => ajustarStock(p, cambio)}
             />
           ))}
         </ul>
@@ -177,12 +191,14 @@ function FilaProducto({
   producto: p,
   guardando,
   onEditar,
-  onAlternar,
+  onAlternarVisible,
+  onAjustarStock,
 }: {
   producto: Producto;
   guardando: boolean;
   onEditar: () => void;
-  onAlternar: (campo: 'visible' | 'agotado') => void;
+  onAlternarVisible: () => void;
+  onAjustarStock: (cambio: number) => void;
 }) {
   const cat = datosCategoria(p.categoria);
   return (
@@ -225,14 +241,8 @@ function FilaProducto({
         <span className="mr-auto text-[17px] font-black tabular-nums text-[#071B3A] sm:mr-3 sm:w-[90px] sm:text-right">
           {precio(p.precio)}
         </span>
-        <Interruptor activo={p.visible} onClick={() => onAlternar('visible')} disabled={guardando} etiqueta="Visible" />
-        <Interruptor
-          activo={p.agotado}
-          onClick={() => onAlternar('agotado')}
-          disabled={guardando}
-          etiqueta="Agotado"
-          colorActivo="#B01C48"
-        />
+        <Interruptor activo={p.visible} onClick={onAlternarVisible} disabled={guardando} etiqueta="Visible" />
+        <ControlStock stock={p.stock} nombre={p.nombre} disabled={guardando} onAjustar={onAjustarStock} />
         <button
           type="button"
           onClick={onEditar}
@@ -243,6 +253,51 @@ function FilaProducto({
         </button>
       </div>
     </li>
+  );
+}
+
+function ControlStock({
+  stock,
+  nombre,
+  disabled,
+  onAjustar,
+}: {
+  stock: number;
+  nombre: string;
+  disabled: boolean;
+  onAjustar: (cambio: number) => void;
+}) {
+  const color = stock <= 0 ? '#B01C48' : stock <= 3 ? '#8F5E05' : '#0F2950';
+  const fondo = stock <= 0 ? '#FBE7ED' : stock <= 3 ? '#FDF3DD' : '#F1F5F9';
+  return (
+    <div
+      role="group"
+      aria-label={`Stock de ${nombre}`}
+      className="inline-flex h-10 flex-shrink-0 items-center rounded-full px-1"
+      style={{ backgroundColor: fondo, color }}
+    >
+      <button
+        type="button"
+        onClick={() => onAjustar(-1)}
+        disabled={disabled || stock <= 0}
+        aria-label="Restar una unidad"
+        className={`flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/70 disabled:opacity-35 ${foco}`}
+      >
+        <Minus className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+      </button>
+      <span className="min-w-[64px] text-center text-[13px] font-extrabold tabular-nums" aria-live="polite">
+        {stock <= 0 ? 'Sin stock' : `${stock} ${stock === 1 ? 'unidad' : 'unid.'}`}
+      </span>
+      <button
+        type="button"
+        onClick={() => onAjustar(1)}
+        disabled={disabled}
+        aria-label="Sumar una unidad"
+        className={`flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/70 disabled:opacity-35 ${foco}`}
+      >
+        <Plus className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 

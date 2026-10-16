@@ -21,7 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { supabasePublico } from '@/lib/supabase';
-import { carrito, MAX_POR_PRODUCTO, useCarrito, type LineaCarrito } from '@/lib/tienda/carrito';
+import { carrito, maximoPermitido, useCarrito, type LineaCarrito } from '@/lib/tienda/carrito';
 import { hayDatosTransferencia, linkWhatsApp, TIENDA } from '@/lib/tienda/config';
 import { precio } from '@/lib/tienda/formato';
 import type { MetodoPago } from '@/lib/tienda/tipos';
@@ -312,8 +312,8 @@ function LineaCarritoItem({ linea, onNavegar }: { linea: LineaCarrito; onNavegar
               <button
                 type="button"
                 onClick={() => carrito.cambiar(linea.id, linea.cantidad + 1)}
-                disabled={linea.cantidad >= MAX_POR_PRODUCTO}
-                aria-label="Agregar uno más"
+                disabled={linea.cantidad >= maximoPermitido(linea.stock)}
+                aria-label={linea.cantidad >= maximoPermitido(linea.stock) ? 'No quedan más unidades disponibles' : 'Agregar uno más'}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-[#071B3A] hover:bg-slate-100 disabled:opacity-40 ${foco}`}
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
@@ -323,6 +323,11 @@ function LineaCarritoItem({ linea, onNavegar }: { linea: LineaCarrito; onNavegar
               {precio(linea.precio * linea.cantidad)}
             </span>
           </div>
+        )}
+        {!linea.agotado && linea.stock <= linea.cantidad && linea.stock <= 20 && (
+          <p className="mt-1.5 text-[12.5px] font-semibold text-[#8F5E05]">
+            {linea.stock === 1 ? 'Es la última unidad.' : `Llevas las ${linea.stock} unidades que quedan.`}
+          </p>
         )}
       </div>
     </li>

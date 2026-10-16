@@ -17,9 +17,12 @@ export type Producto = {
   categoria: CategoriaId;
   precio: number;
   precio_anterior: number | null;
+  /** Unidades disponibles. Se descuenta sola con cada pedido. */
+  stock: number;
   imagen_url: string | null;
   imagen_path: string | null;
   visible: boolean;
+  /** Lo calcula la base de datos: true cuando stock = 0. */
   agotado: boolean;
   destacado: boolean;
   created_at: string;

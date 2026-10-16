@@ -45,6 +45,11 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
             {producto.nombre}
           </Link>
         </h3>
+        {!producto.agotado && producto.stock > 0 && producto.stock <= 3 && (
+          <p className="mt-1 text-[12.5px] font-bold text-[#8F5E05]">
+            {producto.stock === 1 ? 'Última unidad' : `Quedan ${producto.stock}`}
+          </p>
+        )}
 
         <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-2.5 pt-3">
           <p className="leading-none">

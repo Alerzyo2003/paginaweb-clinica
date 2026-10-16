@@ -38,7 +38,7 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
   const [anteriorTexto, setAnteriorTexto] = useState(producto?.precio_anterior ? String(producto.precio_anterior) : '');
   const [descripcion, setDescripcion] = useState(producto?.descripcion ?? '');
   const [visible, setVisible] = useState(producto?.visible ?? true);
-  const [agotado, setAgotado] = useState(producto?.agotado ?? false);
+  const [stockTexto, setStockTexto] = useState(producto ? String(producto.stock) : '');
   const [destacado, setDestacado] = useState(producto?.destacado ?? false);
 
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -90,6 +90,8 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
   const fotoActual = vistaLocal ?? (quitarFoto ? null : producto?.imagen_url ?? null);
   const precioNumero = leerPrecio(precioTexto);
   const anteriorNumero = leerPrecio(anteriorTexto);
+  const stockNumero = leerPrecio(stockTexto);
+  const agotado = stockNumero === 0;
 
   const validar = () => {
     const e: Record<string, string> = {};
@@ -98,6 +100,8 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
     if (precioNumero === null) e.precio = 'Escribe el precio.';
     if (anteriorNumero !== null && precioNumero !== null && anteriorNumero <= precioNumero)
       e.anterior = 'El precio anterior debe ser mayor al precio actual.';
+    if (stockNumero === null) e.stock = 'Escribe cuántas unidades tienes (puede ser 0).';
+    else if (stockNumero > 100000) e.stock = 'Revisa el stock: es un número muy alto.';
     return e;
   };
   const errores: Record<string, string> = intentado ? validar() : {};
@@ -107,7 +111,7 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
     const e = validar();
     setIntentado(true);
     setErrorGeneral('');
-    if (Object.keys(e).length > 0 || !categoria || precioNumero === null) {
+    if (Object.keys(e).length > 0 || !categoria || precioNumero === null || stockNumero === null) {
       document.getElementById(`${id}-${Object.keys(e)[0]}`)?.focus();
       return;
     }
@@ -142,8 +146,9 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
         precio: precioNumero,
         precio_anterior: anteriorNumero,
         visible,
-        agotado,
         destacado,
+        // El stock solo se envía si cambió, para no pisar pedidos que llegaron mientras editabas.
+        ...(!editando || stockNumero !== producto.stock ? { stock: stockNumero } : {}),
         imagen_url,
         imagen_path,
       };
@@ -380,6 +385,33 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
                 </div>
               </div>
 
+              <div className="rounded-[22px] bg-white p-4 ring-1 ring-[#E3EBF3]">
+                <label htmlFor={`${id}-stock`} className={etiqueta}>
+                  Stock disponible
+                </label>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <div className="relative w-[150px]">
+                    <input
+                      id={`${id}-stock`}
+                      value={stockTexto}
+                      onChange={(e) => setStockTexto(e.target.value)}
+                      inputMode="numeric"
+                      placeholder="0"
+                      aria-invalid={Boolean(errores.stock)}
+                      aria-describedby={`${id}-stock-ayuda`}
+                      className={`${input} pr-16 tabular-nums`}
+                    />
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[14px] font-bold text-slate-500">
+                      unid.
+                    </span>
+                  </div>
+                  <p id={`${id}-stock-ayuda`} className="min-w-[200px] flex-1 text-[13px] leading-snug text-slate-500">
+                    Se descuenta solo con cada pedido y vuelve si cancelas el pedido. Con 0 unidades aparece como agotado.
+                  </p>
+                </div>
+                {errores.stock && <ErrorCampo>{errores.stock}</ErrorCampo>}
+              </div>
+
               <div>
                 <label htmlFor={`${id}-descripcion`} className={etiqueta}>
                   Descripción <span className="font-semibold text-slate-500">(opcional)</span>
@@ -397,7 +429,6 @@ export default function EditorProducto({ db, producto, onCerrar, onGuardado }: P
 
               <div className="flex flex-wrap gap-1 rounded-[22px] bg-white p-2 ring-1 ring-[#E3EBF3]">
                 <Interruptor activo={visible} onClick={() => setVisible((v) => !v)} etiqueta="Visible en la tienda" />
-                <Interruptor activo={agotado} onClick={() => setAgotado((v) => !v)} etiqueta="Agotado" colorActivo="#B01C48" />
                 <Interruptor activo={destacado} onClick={() => setDestacado((v) => !v)} etiqueta="Destacado (sale primero)" colorActivo="#E0A000" />
               </div>
             </div>

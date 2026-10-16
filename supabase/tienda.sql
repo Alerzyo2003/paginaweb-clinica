@@ -48,10 +48,11 @@ create table if not exists public.tienda_productos (
                   )),
   precio          integer not null check (precio >= 0),
   precio_anterior integer check (precio_anterior is null or precio_anterior > precio),
+  stock           integer not null default 0 check (stock >= 0),
   imagen_url      text,
   imagen_path     text,
   visible         boolean not null default true,
-  agotado         boolean not null default false,
+  agotado         boolean not null default true,  -- se calcula solo: stock = 0
   destacado       boolean not null default false,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
@@ -73,6 +74,7 @@ create table if not exists public.tienda_pedidos (
   nota             text,
   items            jsonb not null,
   total            integer not null check (total >= 0),
+  descuenta_stock  boolean not null default true,
   estado           text not null default 'pendiente'
                    check (estado in ('pendiente', 'pagado', 'listo', 'entregado', 'cancelado')),
   created_at       timestamptz not null default now(),
@@ -107,6 +109,142 @@ drop trigger if exists tienda_pedidos_updated_at on public.tienda_pedidos;
 create trigger tienda_pedidos_updated_at
   before update on public.tienda_pedidos
   for each row execute function public.tienda_set_updated_at();
+
+-- ---------------------------------------------------------------------
+--  4b. Stock
+--  Para proyectos creados antes de que existiera el stock: agrega las
+--  columnas sin tocar lo que ya hay. Los productos que ya existían quedan
+--  con stock 0 (agotados) hasta que les pongas su cantidad en el panel.
+--  Los pedidos anteriores quedan marcados para no mover el stock.
+-- ---------------------------------------------------------------------
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'tienda_productos' and column_name = 'stock'
+  ) then
+    alter table public.tienda_productos
+      add column stock integer not null default 0 check (stock >= 0);
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'tienda_pedidos' and column_name = 'descuenta_stock'
+  ) then
+    alter table public.tienda_pedidos add column descuenta_stock boolean not null default false;
+    alter table public.tienda_pedidos alter column descuenta_stock set default true;
+  end if;
+end;
+$$;
+
+-- "agotado" ya no se marca a mano: es verdadero cuando el stock llega a 0.
+create or replace function public.tienda_sincronizar_agotado()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.agotado := new.stock <= 0;
+  return new;
+end;
+$$;
+
+drop trigger if exists tienda_productos_agotado on public.tienda_productos;
+create trigger tienda_productos_agotado
+  before insert or update on public.tienda_productos
+  for each row execute function public.tienda_sincronizar_agotado();
+
+update public.tienda_productos set agotado = (stock <= 0) where agotado is distinct from (stock <= 0);
+
+-- Si un pedido se cancela, sus productos vuelven al stock.
+-- Si se reactiva un pedido cancelado, se vuelven a descontar.
+create or replace function public.tienda_stock_por_pedido()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_item   jsonb;
+  v_signo  integer;
+  v_items  jsonb;
+  v_nombre text;
+begin
+  if tg_op = 'UPDATE' then
+    if not new.descuenta_stock or old.estado = new.estado then
+      return new;
+    elsif old.estado <> 'cancelado' and new.estado = 'cancelado' then
+      v_signo := 1;
+    elsif old.estado = 'cancelado' and new.estado <> 'cancelado' then
+      v_signo := -1;
+    else
+      return new;
+    end if;
+    v_items := new.items;
+  elsif tg_op = 'DELETE' then
+    if not old.descuenta_stock or old.estado = 'cancelado' then
+      return old;
+    end if;
+    v_signo := 1;
+    v_items := old.items;
+  else
+    return null;
+  end if;
+
+  for v_item in select * from jsonb_array_elements(v_items) loop
+    update public.tienda_productos
+      set stock = stock + v_signo * (v_item ->> 'cantidad')::integer
+      where id = (v_item ->> 'producto_id')::uuid
+        and stock + v_signo * (v_item ->> 'cantidad')::integer >= 0;
+
+    if not found and v_signo = -1 then
+      select nombre into v_nombre from public.tienda_productos where id = (v_item ->> 'producto_id')::uuid;
+      if v_nombre is not null then
+        raise exception 'No hay stock suficiente de "%" para reactivar este pedido.', v_nombre using errcode = 'P0001';
+      end if;
+    end if;
+  end loop;
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists tienda_pedidos_stock on public.tienda_pedidos;
+create trigger tienda_pedidos_stock
+  after update of estado or delete on public.tienda_pedidos
+  for each row execute function public.tienda_stock_por_pedido();
+
+-- Botones + y − del panel: suma o resta sin pisar pedidos que lleguen al mismo tiempo.
+create or replace function public.tienda_ajustar_stock(p_producto uuid, p_cambio integer)
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_stock integer;
+begin
+  if not public.es_admin_tienda() then
+    raise exception 'No tienes permiso para cambiar el stock.' using errcode = '42501';
+  end if;
+
+  update public.tienda_productos
+    set stock = greatest(stock + p_cambio, 0)
+    where id = p_producto
+    returning stock into v_stock;
+
+  if not found then
+    raise exception 'El producto ya no existe.' using errcode = 'P0001';
+  end if;
+  return v_stock;
+end;
+$$;
+
+revoke all on function public.tienda_ajustar_stock(uuid, integer) from public;
+grant execute on function public.tienda_ajustar_stock(uuid, integer) to authenticated;
 
 -- ---------------------------------------------------------------------
 --  5. Seguridad (RLS)
@@ -236,22 +374,36 @@ begin
            sum((e ->> 'cantidad')::integer)::integer as cantidad
     from jsonb_array_elements(p_items) as e
     group by 1
+    order by 1  -- orden fijo para bloquear filas siempre en el mismo orden
   loop
     if v_linea.cantidad is null or v_linea.cantidad < 1 or v_linea.cantidad > 20 then
       raise exception 'Puedes llevar entre 1 y 20 unidades de cada producto.' using errcode = 'P0001';
     end if;
 
+    -- "for update" evita que dos pedidos simultáneos vendan la misma unidad.
     select * into v_prod
     from public.tienda_productos
-    where id = v_linea.producto_id and visible;
+    where id = v_linea.producto_id and visible
+    for update;
 
     if not found then
       raise exception 'Uno de los productos de tu carrito ya no está disponible. Quítalo e intenta de nuevo.' using errcode = 'P0001';
     end if;
 
-    if v_prod.agotado then
+    if v_prod.stock <= 0 then
       raise exception '"%" está agotado. Quítalo del carrito para continuar.', v_prod.nombre using errcode = 'P0001';
     end if;
+
+    if v_linea.cantidad > v_prod.stock then
+      if v_prod.stock = 1 then
+        raise exception 'Solo queda 1 unidad de "%". Ajusta la cantidad en tu carrito.', v_prod.nombre using errcode = 'P0001';
+      end if;
+      raise exception 'Solo quedan % unidades de "%". Ajusta la cantidad en tu carrito.', v_prod.stock, v_prod.nombre using errcode = 'P0001';
+    end if;
+
+    update public.tienda_productos
+      set stock = stock - v_linea.cantidad
+      where id = v_prod.id;
 
     v_items := v_items || jsonb_build_array(jsonb_build_object(
       'producto_id', v_prod.id,

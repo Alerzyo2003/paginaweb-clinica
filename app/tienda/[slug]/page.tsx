@@ -107,6 +107,12 @@ export default async function ProductoPage({ params }: Props) {
             )}
           </p>
 
+          {!producto.agotado && producto.stock > 0 && producto.stock <= 5 && (
+            <p className="mt-2 text-[15px] font-bold text-[#8F5E05]">
+              {producto.stock === 1 ? 'Queda la última unidad' : `Quedan ${producto.stock} unidades`}
+            </p>
+          )}
+
           {producto.descripcion && (
             <p className="mt-5 max-w-[60ch] whitespace-pre-line text-[16px] leading-relaxed text-slate-600">
               {producto.descripcion}

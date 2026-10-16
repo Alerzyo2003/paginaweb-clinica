@@ -20,6 +20,8 @@ export default function PanelAdmin() {
   const [permiso, setPermiso] = useState<{ userId: string; esAdmin: boolean } | null>(null);
   const [pestana, setPestana] = useState<Pestana>('productos');
   const [pendientes, setPendientes] = useState(0);
+  // Sube cada vez que un cambio en pedidos puede haber movido el stock.
+  const [versionStock, setVersionStock] = useState(0);
 
   useEffect(() => {
     if (!db) return;
@@ -123,10 +125,10 @@ export default function PanelAdmin() {
       <main className="mx-auto max-w-[1200px] px-4 pt-6 md:px-8" role="tabpanel" aria-labelledby={`pestana-${pestana}`}>
         {/* Ambas secciones quedan montadas para no perder filtros al cambiar de pestaña. */}
         <div hidden={pestana !== 'productos'}>
-          <Productos db={db} />
+          <Productos db={db} version={versionStock} />
         </div>
         <div hidden={pestana !== 'pedidos'}>
-          <Pedidos db={db} onPendientes={setPendientes} />
+          <Pedidos db={db} onPendientes={setPendientes} onStockCambiado={() => setVersionStock((v) => v + 1)} />
         </div>
       </main>
     </div>
