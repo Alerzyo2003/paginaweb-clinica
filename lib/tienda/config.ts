@@ -19,9 +19,11 @@ export const TIENDA = {
     abre: '8:30',
     cierraSemana: '19:30',
     cierraSabado: '17:00',
-    /** Cuántos días con atención se muestran para elegir. */
-    diasParaElegir: 12,
-    /** "Hoy" deja de aparecer cuando falta menos que esto para cerrar. */
+    /** Mínimo de días disponibles que muestra el calendario (agrega semanas hasta llegar). */
+    diasParaElegir: 10,
+    /** false: el pedido se retira desde el día siguiente. true: también el mismo día. */
+    permitirHoy: false,
+    /** Si permitirHoy es true, "hoy" deja de aparecer cuando falta menos que esto para cerrar. */
     minutosParaPreparar: 60,
     /** Feriados u otros días cerrados, como '2026-12-25'. */
     diasCerrados: [] as string[],
