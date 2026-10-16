@@ -52,6 +52,7 @@ const navLinks = [
   { name: 'Convenios', href: '/convenios', id: 'convenios' },
   { name: 'Fonasa', href: '/fonasa', id: 'fonasa' }, 
   { name: 'Calculadora', href: '/calculo', id: 'calculadora' }, 
+  { name: 'Tienda', href: '/tienda', id: 'tienda' },
 ];
 
 const especialidades = [
@@ -204,7 +205,7 @@ export default function Navbar() {
           {/* ---------- Menú escritorio ---------- */}
           <nav
             aria-label="Principal"
-            className="hidden items-center gap-1 xl:flex"
+            className="hidden items-center gap-0.5 xl:flex 2xl:gap-1"
             onMouseLeave={() => setHovered(null)}
           >
             {navLinks.map((link) => {
@@ -232,7 +233,7 @@ export default function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="nav-active"
-                      className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full"
+                      className="absolute inset-x-2.5 -bottom-0.5 h-0.5 rounded-full 2xl:inset-x-4"
                       style={{ backgroundColor: AMBER }}
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
@@ -240,7 +241,7 @@ export default function Navbar() {
                 </>
               );
 
-              const linkClass = `relative flex items-center gap-1.5 rounded-full px-4 py-2 text-[15.5px] font-bold transition-colors ${
+              const linkClass = `relative flex items-center gap-1.5 rounded-full px-2.5 py-2 text-[15.5px] font-bold transition-colors 2xl:px-4 ${
                 isActive ? 'text-white' : 'text-slate-300 hover:text-white'
               } ${focusRing}`;
 
@@ -339,7 +340,7 @@ export default function Navbar() {
               href={AGENDA_HREF}
               target="_blank"
               rel="noopener noreferrer"
-              className={`hidden items-center gap-2 rounded-full px-6 py-3 text-[14px] font-extrabold text-[#071B3A] shadow-[0_6px_20px_-6px_rgba(253,185,43,0.55)] transition-all hover:-translate-y-px hover:bg-[#FFC94F] hover:shadow-[0_10px_26px_-6px_rgba(253,185,43,0.7)] active:translate-y-0 active:scale-[0.98] md:inline-flex ${focusRing}`}
+              className={`hidden items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-[14px] font-extrabold text-[#071B3A] shadow-[0_6px_20px_-6px_rgba(253,185,43,0.55)] transition-all hover:-translate-y-px hover:bg-[#FFC94F] hover:shadow-[0_10px_26px_-6px_rgba(253,185,43,0.7)] active:translate-y-0 active:scale-[0.98] md:inline-flex ${focusRing}`}
               style={{ backgroundColor: AMBER }}
             >
               <CalendarCheck className="h-[18px] w-[18px]" aria-hidden="true" />

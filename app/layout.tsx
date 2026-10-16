@@ -2,6 +2,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'; // Importar el Navbar
 import Footer from '@/components/footer'; // Importar el Footer
 import CustomCursor from '@/components/CustomCursor'; // <-- Importar el nuevo cursor animado
+import OcultarEnAdmin from '@/components/OcultarEnAdmin'; // Oculta menú, footer y cursor en /admin
 
 export const metadata = {
   title: 'Clínica Dignidad',
@@ -18,17 +19,17 @@ export default function RootLayout({
       <body className="flex flex-col min-h-screen">
         
         {/* Aquí cargas el cursor globalmente (invisible en móviles automáticamente) */}
-        <CustomCursor />
+        <OcultarEnAdmin><CustomCursor /></OcultarEnAdmin>
         
         {/* Aquí cargas el Navbar globalmente */}
-        <Navbar />
+        <OcultarEnAdmin><Navbar /></OcultarEnAdmin>
         
         <main className="flex-grow">
           {children} {/* Aquí es donde se carga tu page.tsx actual */}
         </main>
         
         {/* Aquí cargas el Footer globalmente */}
-        <Footer />
+        <OcultarEnAdmin><Footer /></OcultarEnAdmin>
         
       </body>
     </html>
