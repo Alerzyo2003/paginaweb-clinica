@@ -23,6 +23,7 @@ import {
 import { supabasePublico } from '@/lib/supabase';
 import { carrito, maximoPermitido, useCarrito, type LineaCarrito } from '@/lib/tienda/carrito';
 import { hayDatosTransferencia, linkWhatsApp, TIENDA } from '@/lib/tienda/config';
+import { horarioEnTexto } from '@/lib/tienda/mensajes';
 import { precio } from '@/lib/tienda/formato';
 import type { MetodoPago } from '@/lib/tienda/tipos';
 import ImagenProducto from './ImagenProducto';
@@ -668,7 +669,8 @@ function mensajeWhatsApp(p: Confirmado) {
         ? 'Pago: transferencia. Les envío el comprobante.'
         : 'Pago: transferencia. ¿Me envían los datos para transferir?'
       : 'Pago: al retirar en la clínica.';
-  return `Hola, hice el pedido N° ${p.numero} en la tienda de la web.\n\n${lineas}\n\nTotal: ${precio(p.total)}\n${pago}\nNombre: ${p.nombre}`;
+  // Termina en el día de retiro para que el cliente solo tenga que escribirlo.
+  return `Hola, hice el pedido N° ${p.numero} en la tienda de la web.\n\n${lineas}\n\nTotal: ${precio(p.total)}\n${pago}\nNombre: ${p.nombre}\n\nQuiero retirarlo el día: `;
 }
 
 function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => void }) {
@@ -731,8 +733,9 @@ function PasoListo({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => v
                   <DatoCopiable etiqueta="Comentario" valor={`Pedido ${pedido.numero}`} />
                 </dl>
                 <p className="mt-3 text-[13.5px] leading-relaxed text-slate-600">
-                  Escribe <strong>Pedido {pedido.numero}</strong> en el comentario de la transferencia y luego
-                  envíanos el comprobante.
+                  Escribe <strong>Pedido {pedido.numero}</strong> en el comentario de la transferencia. Luego
+                  envíanos el comprobante por WhatsApp y cuéntanos qué día vienes a retirarlo
+                  ({horarioEnTexto()}).
                 </p>
               </>
             ) : (
