@@ -6,6 +6,7 @@
 
 import { hayDatosTransferencia, TIENDA } from './config';
 import { precio } from './formato';
+import { fechaLarga, horarioDelDia, hoyEnChile } from './retiro';
 import type { Pedido } from './tipos';
 
 export type PlantillaId =
@@ -44,6 +45,16 @@ function dondeYCuando() {
   return `Atendemos ${horarioEnTexto()}, en ${TIENDA.direccion}.`;
 }
 
+/** El día de retiro todavía no pasa (los pedidos antiguos no lo tienen). */
+function retiroVigente(p: Pedido) {
+  return p.fecha_retiro && p.fecha_retiro >= hoyEnChile() ? p.fecha_retiro : null;
+}
+
+/** "Te esperamos el sábado 17 de octubre, de 8:30 a 17:00, en Av. …" */
+function teEsperamos(fecha: string) {
+  return `Te esperamos el ${fechaLarga(fecha)}, ${horarioDelDia(fecha)}, en ${TIENDA.direccion}.`;
+}
+
 function datosTransferencia(p: Pedido) {
   const t = TIENDA.transferencia;
   if (!hayDatosTransferencia()) return '';
@@ -68,13 +79,17 @@ export const PLANTILLAS: Plantilla[] = [
     nombre: 'Confirmar pedido',
     texto: (p) => {
       const inicio = `Hola ${primerNombre(p)} 👋 Te escribimos de Clínica Dignidad. Recibimos tu pedido N° ${p.numero}:\n\n${productos(p)}\n\n`;
+      const fecha = retiroVigente(p);
       if (p.metodo_pago === 'pago_al_retirar') {
-        return `${inicio}Total a pagar al retirar: ${precio(p.total)}\n\n¿Qué día te acomoda venir a buscarlo? ${dondeYCuando()}`;
+        return `${inicio}Total a pagar al retirar: ${precio(p.total)}\n\n${
+          fecha ? teEsperamos(fecha) : `¿Qué día te acomoda venir a buscarlo? ${dondeYCuando()}`
+        }`;
       }
       const datos = datosTransferencia(p);
+      const dia = fecha ? ` ${teEsperamos(fecha)}` : ' y cuéntanos qué día quieres venir a retirarlo.';
       return datos
-        ? `${inicio}Total: ${precio(p.total)}\n\nPara dejarlo reservado, transfiere a cualquiera de estas cuentas:\n\n${datos}\n\nLuego envíanos el comprobante por aquí y cuéntanos qué día quieres venir a retirarlo. ¡Gracias!`
-        : `${inicio}Total: ${precio(p.total)}\n\nTe enviamos ahora los datos para transferir. Cuando pagues, mándanos el comprobante por aquí y cuéntanos qué día quieres venir a retirarlo.`;
+        ? `${inicio}Total: ${precio(p.total)}\n\nPara dejarlo reservado, transfiere a cualquiera de estas cuentas:\n\n${datos}\n\nLuego envíanos el comprobante por aquí${fecha ? '.' : ''}${dia} ¡Gracias!`
+        : `${inicio}Total: ${precio(p.total)}\n\nTe enviamos ahora los datos para transferir. Cuando pagues, mándanos el comprobante por aquí${fecha ? '.' : ''}${dia}`;
     },
   },
   {
@@ -94,11 +109,16 @@ export const PLANTILLAS: Plantilla[] = [
   },
   {
     id: 'pago_recibido',
-    nombre: 'Pago recibido: ¿qué día retira?',
-    texto: (p) =>
-      `¡Hola ${primerNombre(p)}! Recibimos tu transferencia de ${precio(p.total)} ✅ Muchas gracias.\n\n` +
-      `¿Qué día te acomoda venir a retirar tu pedido N° ${p.numero}? ${dondeYCuando()}\n\n` +
-      'Respóndenos con el día y te lo dejamos listo.',
+    nombre: 'Pago recibido',
+    texto: (p) => {
+      const fecha = retiroVigente(p);
+      return (
+        `¡Hola ${primerNombre(p)}! Recibimos tu transferencia de ${precio(p.total)} ✅ Muchas gracias.\n\n` +
+        (fecha
+          ? `Tu pedido N° ${p.numero} queda reservado. ${teEsperamos(fecha)} Si necesitas cambiar el día, avísanos por aquí.`
+          : `¿Qué día te acomoda venir a retirar tu pedido N° ${p.numero}? ${dondeYCuando()}\n\nRespóndenos con el día y te lo dejamos listo.`)
+      );
+    },
   },
   {
     id: 'listo',
@@ -108,7 +128,7 @@ export const PLANTILLAS: Plantilla[] = [
       (p.metodo_pago === 'pago_al_retirar'
         ? `Total a pagar en recepción: ${precio(p.total)}\n\n`
         : 'Ya está pagado, solo tienes que venir a buscarlo.\n\n') +
-      `${dondeYCuando()} Menciona tu número de pedido en recepción. Te lo guardamos ${TIENDA.diasReserva} días hábiles.`,
+      `${retiroVigente(p) ? teEsperamos(retiroVigente(p)!) : dondeYCuando()} Menciona tu número de pedido en recepción. Te lo guardamos ${TIENDA.diasReserva} días hábiles.`,
   },
   {
     id: 'recordar_retiro',
