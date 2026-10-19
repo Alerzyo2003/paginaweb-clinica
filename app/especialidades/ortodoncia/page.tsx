@@ -1,5 +1,6 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
@@ -191,15 +192,17 @@ export default function OrtodonciaPage() {
                 className="mt-8 flex flex-wrap items-center gap-4"
               >
                 <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <Link
-                    href="/#agenda"
+                  <a
+                    href={AGENDA_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`group flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-extrabold text-[#071B3A] shadow-lg transition-colors hover:bg-[#FFC94F] ${focusLight}`}
                     style={{ backgroundColor: AMBER }}
                   >
                     <CalendarCheck className="h-5 w-5 transition-transform duration-300 group-hover:rotate-[-8deg]" />
                     Agendar evaluación
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Link>
+                  </a>
                 </motion.div>
 
                 <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }}>

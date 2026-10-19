@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import { 
   Building2, 
@@ -306,26 +305,32 @@ export default function ConveniosPage() {
             {faqs.map((faq, index) => (
               <div key={index} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                 <button
+                  type="button"
+                  id={`faq-convenio-btn-${index}`}
+                  aria-expanded={openFaq === index}
+                  aria-controls={`faq-convenio-panel-${index}`}
                   onClick={() => toggleFaq(index)}
                   className="w-full flex items-center justify-between p-6 text-left font-black text-[#071B3A] hover:text-[#0A9BB8] transition-colors"
                 >
                   <span className="text-lg">{faq.pregunta}</span>
                   <ChevronDown className={`h-5 w-5 shrink-0 transition-transform duration-300 ${openFaq === index ? 'rotate-180 text-[#0A9BB8]' : 'text-slate-400'}`} />
                 </button>
-                <AnimatePresence>
-                  {openFaq === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="p-6 pt-0 text-slate-600 font-medium leading-relaxed border-t border-slate-100">
-                        {faq.respuesta}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* La respuesta siempre está en el HTML (Google la lee); solo se oculta visualmente al cerrar. */}
+                <div
+                  id={`faq-convenio-panel-${index}`}
+                  role="region"
+                  aria-labelledby={`faq-convenio-btn-${index}`}
+                  inert={openFaq !== index}
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                    openFaq === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="p-6 pt-0 text-slate-600 font-medium leading-relaxed border-t border-slate-100">
+                      {faq.respuesta}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -29,7 +30,6 @@ const MAGENTA = '#B01C48';
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
-const AGENDA_HREF = 'https://confirmar-cita-dignidad.vercel.app/agendar';
 
 const focusLight = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#071B3A] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
 

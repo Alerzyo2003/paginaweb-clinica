@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { AGENDA_HREF } from '@/lib/clinica';
+import { Fragment, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
@@ -27,6 +28,7 @@ import {
   Heart,
   HeartPulse,
   Info,
+  MapPin,
   MessageCircle,
   Phone,
   RefreshCcw,
@@ -63,7 +65,6 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
-const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 const WHATSAPP_HREF = 'https://wa.me/56966467641';
 
 const focusDark =
@@ -253,15 +254,21 @@ const DIAGNOSTIC_FLOW: Record<string, FlowNode> = {
 /*  Piezas reutilizables                                               */
 /* ------------------------------------------------------------------ */
 
+// Separa las palabras para animarlas una por una. Entre palabra y palabra deja un espacio
+// real (no un margen), para que Google y los lectores de pantalla lean la frase completa.
 function SplitWords({ text }: { text: string }) {
+  const words = text.split(' ');
   return (
     <>
-      {text.split(' ').map((word, i) => (
-        <span key={i} className="mr-[0.25em] inline-block overflow-hidden pb-[0.14em] -mb-[0.14em] align-bottom">
-          <span data-hero="word" className="inline-block will-change-transform">
-            {word}
+      {words.map((word, i) => (
+        <Fragment key={i}>
+          <span className="inline-block overflow-hidden pb-[0.14em] -mb-[0.14em] align-bottom">
+            <span data-hero="word" className="inline-block will-change-transform">
+              {word}
+            </span>
           </span>
-        </span>
+          {i < words.length - 1 && ' '}
+        </Fragment>
       ))}
     </>
   );
@@ -422,22 +429,20 @@ function FaqItem({
           </motion.span>
         </button>
       </h3>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            id={`faq-panel-${index}`}
-            role="region"
-            aria-labelledby={`faq-btn-${index}`}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <p className="border-t border-slate-100 px-6 pb-6 pt-4 leading-relaxed text-slate-600">{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* La respuesta siempre está en el HTML (Google la lee); solo se oculta visualmente al cerrar. */}
+      <div
+        id={`faq-panel-${index}`}
+        role="region"
+        aria-labelledby={`faq-btn-${index}`}
+        inert={!open}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="border-t border-slate-100 px-6 pb-6 pt-4 leading-relaxed text-slate-600">{a}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -571,8 +576,16 @@ export default function Home() {
                   />
                 </div>
 
+                <p
+                  data-hero="badge"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-bold text-slate-200"
+                >
+                  <MapPin className="h-4 w-4 text-[#FDB92B]" aria-hidden="true" />
+                  Clínica dental en La Pintana
+                </p>
+
                 <h1 className="text-[40px] font-black leading-[1.08] tracking-tight md:text-5xl lg:text-[56px]">
-                  <SplitWords text="Tu sonrisa nos importa." />
+                  <SplitWords text="Tu sonrisa nos importa." />{' '}
                   <span className="mt-2 block text-[#FDB92B]">
                     <SplitWords text="Confía en expertos para un futuro brillante." />
                   </span>
@@ -991,9 +1004,16 @@ export default function Home() {
                   ¿Atienden por ISAPRE y FONASA?
                 </h3>
                 <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-blue-100/80">
-                  En Clínica Dignidad atendemos de manera particular. Ofrecemos precios accesibles y te entregamos todo
-                  lo necesario para que gestiones tu reembolso directamente con tu Isapre o seguro complementario.
+                  Atendemos de manera particular, con precios accesibles. Si eres Fonasa tramo B, C o D y tienes entre
+                  12 y 34 años, también puedes hacerte un tratamiento de conducto por Fonasa. Con Isapre o seguro
+                  complementario, te entregamos todo lo necesario para pedir tu reembolso.
                 </p>
+                <Link
+                  href="/fonasa"
+                  className={`mt-4 inline-flex w-fit items-center gap-1.5 rounded text-[14px] font-bold text-[#FDB92B] hover:underline ${focusDark}`}
+                >
+                  Ver requisitos de Fonasa <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
 
                 <div className="mt-8 flex flex-col items-center gap-5 rounded-3xl border border-white/10 bg-[#0B2350] p-6 sm:flex-row sm:items-start">
                   <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-inner">
@@ -1048,7 +1068,7 @@ export default function Home() {
                 </p>
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
-                    href="#agenda"
+                    href="/convenios"
                     className="flex w-fit items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-[15px] font-bold text-[#7D41F0] shadow-lg transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#7D41F0]"
                   >
                     Revisar convenios <ArrowRight className="h-4 w-4" aria-hidden="true" />

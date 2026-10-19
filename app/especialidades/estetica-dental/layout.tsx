@@ -1,0 +1,14 @@
+import type { ReactNode } from 'react';
+import { metaPagina } from '@/lib/seo';
+
+// Título y descripción que muestra Google para esta página.
+export const metadata = metaPagina({
+  titulo: 'Estética dental en La Pintana · Blanqueamiento y carillas',
+  descripcion:
+    'Blanqueamiento, carillas y diseño de sonrisa en La Pintana. Agenda una evaluación gratis y te recomendamos la opción que más te conviene.',
+  ruta: '/especialidades/estetica-dental',
+});
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return children;
+}
