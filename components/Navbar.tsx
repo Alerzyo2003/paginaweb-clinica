@@ -1,5 +1,6 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,7 +40,6 @@ const BRAND_BAR = ['#6B9A2A', '#0A9BB8', '#FDB92B', '#B01C48']; // verde, turque
 
 const PHONE_LABEL = '+56 9 6646 7641';
 const PHONE_HREF = 'tel:+56966467641';
-const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 
 /* ------------------------------------------------------------------ */
 /*  Datos de navegación                                                */

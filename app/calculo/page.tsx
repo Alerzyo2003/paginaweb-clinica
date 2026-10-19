@@ -1,5 +1,6 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -29,7 +30,6 @@ const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
 const NAVY = '#071B3A';
 const AMBER = '#FDB92B';
 const SOFT = '#F6F9FD';
-const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 
 type TreatmentData = {
   id: string;

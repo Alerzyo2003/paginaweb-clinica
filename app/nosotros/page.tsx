@@ -1,10 +1,10 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  AnimatePresence,
   MotionConfig,
   animate,
   motion,
@@ -61,8 +61,6 @@ const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 const PHONE_LABEL = '+56 9 9446 4662';
 const PHONE_HREF = 'tel:+56994464662';
 const WHATSAPP_HREF = 'https://wa.me/56994464662';
-const AGENDA_HREF =
-  'https://agendar.clinicadignidad.cl/agendar';
 const TMC_HREF = 'https://tmc.dideco.cl/services/dignidad-centro-medico-y-dental/';
 
 const focusDark =
@@ -406,22 +404,20 @@ function FaqItem({
           </motion.span>
         </button>
       </h3>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            id={`faq-panel-${index}`}
-            role="region"
-            aria-labelledby={`faq-btn-${index}`}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <p className="border-t border-slate-100 px-6 pb-6 pt-4 leading-relaxed text-slate-600">{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* La respuesta siempre está en el HTML (Google la lee); solo se oculta visualmente al cerrar. */}
+      <div
+        id={`faq-panel-${index}`}
+        role="region"
+        aria-labelledby={`faq-btn-${index}`}
+        inert={!open}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="border-t border-slate-100 px-6 pb-6 pt-4 leading-relaxed text-slate-600">{a}</p>
+        </div>
+      </div>
     </motion.div>
   );
 }

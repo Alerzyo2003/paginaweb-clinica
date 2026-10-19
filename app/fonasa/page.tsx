@@ -1,5 +1,6 @@
 'use client';
 
+import { AGENDA_HREF } from '@/lib/clinica';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -28,7 +29,6 @@ const GREEN_LIGHT = '#8DBF3F';
 const MAGENTA_LIGHT = '#E5527B';
 const SOFT = '#F6F9FD';
 
-const AGENDA_HREF = 'http://agendar.clinicadignidad.cl/agendar';
 const focusDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
 

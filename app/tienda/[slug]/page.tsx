@@ -9,6 +9,7 @@ import { categoria as datosCategoria } from '@/lib/tienda/categorias';
 import { linkWhatsApp, TIENDA } from '@/lib/tienda/config';
 import { obtenerProducto, obtenerProductos } from '@/lib/tienda/datos';
 import { precio } from '@/lib/tienda/formato';
+import { metaPagina } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,20 +18,20 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const producto = await obtenerProducto(slug);
-  if (!producto) return { title: 'Producto no encontrado | Clínica Dignidad' };
+  if (!producto) return { title: 'Producto no encontrado', robots: { index: false } };
 
-  const titulo = `${producto.nombre}${producto.marca ? ` ${producto.marca}` : ''} | Tienda Clínica Dignidad`;
+  // La plantilla del layout raíz agrega " | Clínica Dignidad" al final.
+  const titulo = `${producto.nombre}${producto.marca ? ` ${producto.marca}` : ''} · Tienda`;
   const descripcion =
     producto.descripcion?.slice(0, 160) ??
     `${producto.nombre} a ${precio(producto.precio)}. Pide online y retira en la Clínica Dignidad, La Pintana.`;
 
+  const meta = metaPagina({ titulo, descripcion, ruta: `/tienda/${slug}` });
   return {
-    title: titulo,
-    description: descripcion,
+    ...meta,
     openGraph: {
-      title: titulo,
-      description: descripcion,
-      images: producto.imagen_url ? [{ url: producto.imagen_url }] : undefined,
+      ...meta.openGraph,
+      images: producto.imagen_url ? [{ url: producto.imagen_url }] : meta.openGraph?.images,
     },
   };
 }

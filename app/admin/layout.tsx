@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { nunito } from '@/lib/fuentes';
 
 export const metadata: Metadata = {
-  title: 'Panel de la tienda | Clínica Dignidad',
+  title: 'Panel de la tienda',
   robots: { index: false, follow: false },
 };
 

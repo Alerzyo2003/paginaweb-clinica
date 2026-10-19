@@ -5,16 +5,18 @@ import Catalogo from '@/components/tienda/Catalogo';
 import { linkWhatsApp, TIENDA } from '@/lib/tienda/config';
 import { CATEGORIAS } from '@/lib/tienda/categorias';
 import { obtenerProductos } from '@/lib/tienda/datos';
+import { metaPagina } from '@/lib/seo';
 import type { CategoriaId } from '@/lib/tienda/tipos';
 
 // Siempre muestra los precios y el stock más recientes del panel.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Tienda | Clínica Dignidad',
-  description:
+export const metadata: Metadata = metaPagina({
+  titulo: 'Tienda de higiene oral en La Pintana',
+  descripcion:
     'Cepillos, pastas, enjuagues y productos de higiene oral recomendados por la Clínica Dignidad. Pide online y retira en La Pintana.',
-};
+  ruta: '/tienda',
+});
 
 const PASOS = [
   {
