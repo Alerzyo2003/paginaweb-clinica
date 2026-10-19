@@ -62,7 +62,7 @@ const PHONE_LABEL = '+56 9 9446 4662';
 const PHONE_HREF = 'tel:+56994464662';
 const WHATSAPP_HREF = 'https://wa.me/56994464662';
 const AGENDA_HREF =
-  'https://d531f286059606eb615a04840514483424142e3e.agenda.softwaredentalink.com/agenda?modalidad=1';
+  'https://agendar.clinicadignidad.cl/agendar';
 const TMC_HREF = 'https://tmc.dideco.cl/services/dignidad-centro-medico-y-dental/';
 
 const focusDark =
