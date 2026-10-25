@@ -47,7 +47,8 @@ type TreatmentData = {
 const ICONOS: Record<string, LucideIcon> = {
   evaluacion: Stethoscope, limpieza: Sparkles, caries: ShieldCheck, endodoncia: Activity, extraccion: Syringe,
   corona: Star, implante: Bone, protesis: HeartPulse, brackets: Smile, blanqueamiento: Droplets,
-  carillas: Sparkles, sellante: CheckCircle2,
+  carillas: Sparkles, sellante: CheckCircle2, 'endodoncia-premolar': Activity, 'endodoncia-molar': Activity,
+  'muela-juicio': Syringe, 'corona-implante': Bone, panoramica: Info,
 };
 const treatments: Record<string, TreatmentData> = Object.fromEntries(
   PRECIOS.map((p) => [
@@ -364,6 +365,7 @@ export default function CalculadoraPage() {
                         p.nombre
                       )}
                       {p.porPieza && <span className="ml-1.5 text-[13px] font-medium text-slate-500">(por pieza)</span>}
+                      {p.nota && <span className="mt-0.5 block text-[13px] font-medium text-slate-500">{p.nota}</span>}
                       {p.fonasaPAD && (
                         <Link href="/fonasa" className="mt-0.5 block text-[13px] font-semibold text-[#3F6212] hover:underline">
                           Con Bono PAD Fonasa: desde {pesos(p.fonasaPAD)}

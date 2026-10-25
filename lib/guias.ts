@@ -26,8 +26,14 @@ const tapadura = pesos(precio('caries').desde);
 const extraccion = pesos(precio('extraccion').desde);
 const brackets = pesos(precio('brackets').desde);
 const implante = pesos(precio('implante').desde);
+const coronaImplante = pesos(precio('corona-implante').desde);
+const muelaJuicio = pesos(precio('muela-juicio').desde);
 const endo = pesos(precio('endodoncia').desde);
 const endoPAD = pesos(precio('endodoncia').fonasaPAD ?? 0);
+const endoPremolar = pesos(precio('endodoncia-premolar').desde);
+const endoMolar = pesos(precio('endodoncia-molar').desde);
+const endoMolarPAD = pesos(precio('endodoncia-molar').fonasaPAD ?? 0);
+const controlOrto = '$27.000'; // Control De Evolución Ortodoncia Convencional (arancel)
 const blanqueamiento = pesos(precio('blanqueamiento').desde);
 const carillas = pesos(precio('carillas').desde);
 const sellante = pesos(precio('sellante').desde);
@@ -74,7 +80,7 @@ export const GUIAS: Record<string, Guia> = {
 
   ortodoncia: {
     nombre: 'ortodoncia',
-    resumen: `La ortodoncia corrige la posición de los dientes y la mordida con brackets o alineadores transparentes. El tratamiento suele durar entre 12 y 24 meses, con controles cada 4 a 6 semanas, y termina con un retenedor. En Clínica Dignidad los brackets parten en ${brackets} (valor de referencia) y la evaluación es gratis.`,
+    resumen: `La ortodoncia corrige la posición de los dientes y la mordida con brackets o alineadores transparentes. El tratamiento suele durar entre 12 y 24 meses, con controles cada 4 a 6 semanas, y termina con un retenedor. En Clínica Dignidad la instalación de brackets parte en ${brackets} y cada control en ${controlOrto}. La evaluación es gratis.`,
     etapas: [
       { titulo: 'Evaluación y estudio', texto: 'Radiografías, fotos y registros de la mordida para diagnosticar el problema y planificar el tratamiento.' },
       { titulo: 'Instalación', texto: 'Se pegan los brackets o se entregan los primeros alineadores. La instalación toma entre 1 y 2 horas.' },
@@ -83,8 +89,8 @@ export const GUIAS: Record<string, Guia> = {
     ],
     datos: [
       ['Duración habitual', '12 a 24 meses, según el caso'],
-      ['Controles', 'Cada 4 a 6 semanas'],
-      ['Brackets', `Desde ${brackets} (el plan completo se cotiza en la evaluación)`],
+      ['Instalación de brackets', `Desde ${brackets} (autoligado)`],
+      ['Cada control', `Desde ${controlOrto}`],
       ['Edad', 'Niños desde los 7 años (evaluación) y adultos sin límite si las encías están sanas'],
     ],
     riesgos: [
@@ -113,7 +119,7 @@ export const GUIAS: Record<string, Guia> = {
 
   implantologia: {
     nombre: 'implantes dentales',
-    resumen: `Un implante dental es un tornillo de titanio que reemplaza la raíz de un diente perdido y sostiene una corona fija. Entre la cirugía y la corona definitiva pasan habitualmente de 3 a 6 meses. En Clínica Dignidad el implante parte en ${implante} por pieza; el valor total, con la corona, se define en la evaluación.`,
+    resumen: `Un implante dental es un tornillo de titanio que reemplaza la raíz de un diente perdido y sostiene una corona fija. Entre la cirugía y la corona definitiva pasan habitualmente de 3 a 6 meses. En Clínica Dignidad la cirugía del implante parte en ${implante} y la corona sobre implante en ${coronaImplante}.`,
     etapas: [
       { titulo: 'Evaluación con imágenes', texto: 'Una radiografía o escáner muestra la cantidad de hueso disponible. Si falta, puede requerirse un injerto antes.' },
       { titulo: 'Cirugía', texto: 'Con anestesia local se coloca el implante en el hueso. Toma alrededor de una hora por implante.' },
@@ -121,10 +127,11 @@ export const GUIAS: Record<string, Guia> = {
       { titulo: 'Corona', texto: 'Se toma una impresión y se instala la corona definitiva, hecha a la medida de tu mordida.' },
     ],
     datos: [
-      ['Implante', `Desde ${implante} por pieza`],
+      ['Cirugía de implante', `Desde ${implante} por pieza`],
+      ['Corona sobre implante', `Desde ${coronaImplante} por pieza`],
       ['Tiempo total', '3 a 6 meses (más si se necesita injerto)'],
       ['Cirugía', 'Alrededor de 1 hora por implante, con anestesia local'],
-      ['Evaluación', 'Gratis'],
+      ['Muela del juicio', `Extracción desde ${muelaJuicio}`],
     ],
     riesgos: [
       'Hinchazón, molestia y algo de sangrado durante 2 a 5 días después de la cirugía.',
@@ -152,7 +159,7 @@ export const GUIAS: Record<string, Guia> = {
 
   endodoncia: {
     nombre: 'endodoncia',
-    resumen: `La endodoncia o tratamiento de conducto limpia y sella el interior de un diente con el nervio inflamado o infectado, para conservarlo en vez de extraerlo. Se hace con anestesia local en 1 a 3 sesiones. En Clínica Dignidad parte en ${endo} por pieza, o desde ${endoPAD} con Bono PAD Fonasa si cumples los requisitos.`,
+    resumen: `La endodoncia o tratamiento de conducto limpia y sella el interior de un diente con el nervio inflamado o infectado, para conservarlo en vez de extraerlo. Se hace con anestesia local en 1 a 3 sesiones. En Clínica Dignidad parte en ${endo} en dientes anteriores y ${endoMolar} en molares, o desde ${endoPAD} con Bono PAD Fonasa si cumples los requisitos.`,
     etapas: [
       { titulo: 'Diagnóstico', texto: 'Con radiografías y pruebas de sensibilidad confirmamos si el nervio está dañado y cuántos conductos tiene el diente.' },
       { titulo: 'Limpieza de los conductos', texto: 'Con anestesia local y el diente aislado, se retira el tejido dañado y se desinfectan los conductos.' },
@@ -160,8 +167,8 @@ export const GUIAS: Record<string, Guia> = {
       { titulo: 'Restauración', texto: 'El diente se reconstruye con resina o, en muelas, muchas veces con una corona, para que no se fracture.' },
     ],
     datos: [
-      ['Particular', `Desde ${endo} por pieza`],
-      ['Con Bono PAD Fonasa', `Desde ${endoPAD} (12 a 34 años, tramos B, C y D)`],
+      ['Particular', `Anterior desde ${endo} · premolar desde ${endoPremolar} · molar desde ${endoMolar}`],
+      ['Con Bono PAD Fonasa', `Desde ${endoPAD} hasta ${endoMolarPAD} (12 a 34 años, tramos B, C y D)`],
       ['Sesiones', '1 a 3, de 60 a 90 minutos cada una'],
       ['Anestesia', 'Local'],
     ],
@@ -189,7 +196,7 @@ export const GUIAS: Record<string, Guia> = {
 
   'estetica-dental': {
     nombre: 'estética dental',
-    resumen: `La estética dental mejora el color, la forma y la proporción de los dientes con blanqueamiento, carillas de resina o cerámica y contorneado. Antes se revisa que dientes y encías estén sanos. En Clínica Dignidad el blanqueamiento parte en ${blanqueamiento} y las carillas en ${carillas} por pieza. La evaluación es gratis.`,
+    resumen: `La estética dental mejora el color, la forma y la proporción de los dientes con blanqueamiento, carillas de resina o cerámica y contorneado. Antes se revisa que dientes y encías estén sanos. En Clínica Dignidad el blanqueamiento parte en ${blanqueamiento} por sesión y las carillas de resina en ${carillas} por pieza. La evaluación es gratis.`,
     etapas: [
       { titulo: 'Evaluación y limpieza', texto: 'Se tratan caries o problemas de encías antes de cualquier tratamiento estético, y se registra el color inicial.' },
       { titulo: 'Diseño', texto: 'Definimos contigo el color y la forma que buscas, de acuerdo con tu rostro y tu sonrisa.' },
@@ -197,8 +204,8 @@ export const GUIAS: Record<string, Guia> = {
       { titulo: 'Control', texto: 'Revisamos el resultado, la sensibilidad y te indicamos cómo mantenerlo.' },
     ],
     datos: [
-      ['Blanqueamiento', `Desde ${blanqueamiento}`],
-      ['Carillas', `Desde ${carillas} por pieza`],
+      ['Blanqueamiento', `Desde ${blanqueamiento} por sesión`],
+      ['Carillas', `Resina desde ${carillas} · cerámica (indirectas) desde $140.000, por pieza`],
       ['Carillas de resina', 'Habitualmente en 1 sesión'],
       ['Duración del blanqueamiento', '1 a 3 años, según hábitos como café o cigarro'],
     ],
@@ -228,7 +235,7 @@ export const GUIAS: Record<string, Guia> = {
 
   odontopediatria: {
     nombre: 'odontopediatría',
-    resumen: `La odontopediatría es la atención dental de niñas y niños, desde los primeros dientes hasta la adolescencia. La primera visita se recomienda al aparecer el primer diente o antes del año de vida, con controles cada 6 meses. Incluye prevención con flúor y sellantes (desde ${sellante}), tapaduras y orientación para la familia.`,
+    resumen: `La odontopediatría es la atención dental de niñas y niños, desde los primeros dientes hasta la adolescencia. La primera visita se recomienda al aparecer el primer diente o antes del año de vida, con controles cada 6 meses. Incluye prevención con flúor y sellantes (desde ${sellante} por pieza), tapaduras y orientación para la familia.`,
     etapas: [
       { titulo: 'Adaptación', texto: 'Mostramos y explicamos cada instrumento antes de usarlo, para que la visita sea tranquila.' },
       { titulo: 'Examen', texto: 'Revisamos dientes, encías y mordida, y evaluamos el riesgo de caries según los hábitos del niño.' },
@@ -238,7 +245,7 @@ export const GUIAS: Record<string, Guia> = {
     datos: [
       ['Primera visita', 'Con el primer diente o antes del año'],
       ['Controles', 'Cada 6 meses, o según el riesgo de caries'],
-      ['Flúor / sellante', `Desde ${sellante}`],
+      ['Sellante', `Desde ${sellante} por pieza`],
       ['Evaluación', 'Gratis'],
     ],
     riesgos: [
@@ -266,7 +273,7 @@ export const GUIAS: Record<string, Guia> = {
 
   'rehabilitacion-oral': {
     nombre: 'rehabilitación oral',
-    resumen: `La rehabilitación oral recupera dientes dañados o perdidos con coronas, puentes y prótesis removibles o sobre implantes, para volver a masticar y hablar con comodidad. En Clínica Dignidad las coronas parten en ${corona} por pieza y las prótesis en ${protesis}. El plan y su valor final se definen en la evaluación gratuita.`,
+    resumen: `La rehabilitación oral recupera dientes dañados o perdidos con coronas, puentes y prótesis removibles o sobre implantes, para volver a masticar y hablar con comodidad. En Clínica Dignidad las coronas parten en ${corona} por pieza y las prótesis removibles en ${protesis}. El plan y su valor final se definen en la evaluación gratuita.`,
     etapas: [
       { titulo: 'Evaluación', texto: 'Revisamos los dientes que quedan, las encías y la mordida, con radiografías, para elegir la mejor opción.' },
       { titulo: 'Tratamientos previos', texto: 'Si hace falta, primero se tratan caries, conductos o encías para que la base esté sana.' },
@@ -275,7 +282,7 @@ export const GUIAS: Record<string, Guia> = {
     ],
     datos: [
       ['Corona', `Desde ${corona} por pieza · 2 a 3 sesiones`],
-      ['Prótesis', `Desde ${protesis} · 3 a 5 sesiones`],
+      ['Prótesis removible', `Desde ${protesis} (1 a 3 piezas) · 3 a 5 sesiones`],
       ['Opciones', 'Coronas, puentes, prótesis removibles y sobre implantes'],
       ['Evaluación', 'Gratis'],
     ],
