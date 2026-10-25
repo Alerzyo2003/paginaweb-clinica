@@ -576,22 +576,24 @@ export default function Home() {
                   />
                 </div>
 
-                <p
+                {/* El H1 es lo que Google lee como tema de la página: servicio + comuna. */}
+                <h1
                   data-hero="badge"
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-bold text-slate-200"
                 >
                   <MapPin className="h-4 w-4 text-[#FDB92B]" aria-hidden="true" />
                   Clínica dental en La Pintana
-                </p>
+                </h1>
 
-                <h1 className="text-[40px] font-black leading-[1.08] tracking-tight md:text-5xl lg:text-[56px]">
+                <p className="text-[40px] font-black leading-[1.08] tracking-tight md:text-5xl lg:text-[56px]">
                   <SplitWords text="Tu sonrisa nos importa." />{' '}
                   <span className="mt-2 block text-[#FDB92B]">
                     <SplitWords text="Confía en expertos para un futuro brillante." />
                   </span>
-                </h1>
+                </p>
 
-                <p data-hero="fade" className="max-w-lg text-base font-medium leading-relaxed text-slate-300 lg:text-lg">
+                {/* Sin animación de opacidad: es el elemento LCP y debe verse desde el HTML inicial. */}
+                <p className="max-w-lg text-base font-medium leading-relaxed text-slate-300 lg:text-lg">
                   Cuidamos tu sonrisa con profesionalismo y calidez. En Clínica Dignidad, construimos juntos un futuro
                   más saludable.
                 </p>
@@ -1054,7 +1056,7 @@ export default function Home() {
 
             <div
               className="relative mt-8 flex min-h-[400px] w-full flex-col items-center overflow-hidden rounded-[2.5rem] bg-cover bg-center p-8 shadow-2xl md:min-h-[460px] md:flex-row md:p-14 lg:p-16"
-              style={{ backgroundColor: '#7D41F0', backgroundImage: `url('/tarjeta.png')` }}
+              style={{ backgroundColor: '#7D41F0', backgroundImage: `url('/tarjeta.webp')` }}
             >
               <div className="relative z-10 mr-auto mt-6 flex max-w-[340px] flex-col items-center space-y-4 text-center md:mt-0 md:items-start md:text-left lg:max-w-md">
                 <span className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-[13px] font-bold text-white">
@@ -1159,7 +1161,7 @@ export default function Home() {
           <div
             aria-hidden="true"
             className="pointer-events-none absolute left-0 top-0 z-0 h-[1500px] w-full bg-cover bg-top bg-no-repeat"
-            style={{ backgroundImage: `url('/fondo-preguntas.png')` }}
+            style={{ backgroundImage: `url('/fondo-preguntas.webp')` }}
           />
 
           <div className="relative z-10 mx-auto max-w-[1000px] px-4 md:px-8">

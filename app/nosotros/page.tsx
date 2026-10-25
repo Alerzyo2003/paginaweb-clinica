@@ -1,6 +1,6 @@
 'use client';
 
-import { AGENDA_HREF } from '@/lib/clinica';
+import { AGENDA_HREF, CLINICA } from '@/lib/clinica';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -56,11 +56,10 @@ const MAGENTA_LIGHT = '#E5527B';
 const SOFT = '#F6F9FD';
 const BRAND_BAR = [GREEN, TEAL, AMBER, MAGENTA];
 
-// OJO: la home usa +56 9 6646 7641 y el sitio actual publica +56 9 9446 4662.
-// Deja uno solo en src/lib/brand.ts para no tener dos números dando vueltas.
-const PHONE_LABEL = '+56 9 9446 4662';
-const PHONE_HREF = 'tel:+56994464662';
-const WHATSAPP_HREF = 'https://wa.me/56994464662';
+// Teléfono único del sitio: se cambia en lib/clinica.ts.
+const PHONE_LABEL = CLINICA.telefonoVisible;
+const PHONE_HREF = `tel:${CLINICA.telefono}`;
+const WHATSAPP_HREF = CLINICA.whatsappUrl;
 const TMC_HREF = 'https://tmc.dideco.cl/services/dignidad-centro-medico-y-dental/';
 
 const focusDark =
@@ -945,7 +944,7 @@ export default function Nosotros() {
           <div
             aria-hidden="true"
             className="pointer-events-none absolute left-0 top-0 z-0 h-[1500px] w-full bg-cover bg-top bg-no-repeat"
-            style={{ backgroundImage: `url('/fondo-preguntas.png')` }}
+            style={{ backgroundImage: `url('/fondo-preguntas.webp')` }}
           />
 
           <div className="relative z-10 mx-auto max-w-[1000px] px-4 md:px-8">

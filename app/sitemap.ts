@@ -2,10 +2,17 @@ import type { MetadataRoute } from 'next';
 import { CLINICA } from '@/lib/clinica';
 import { obtenerProductos } from '@/lib/tienda/datos';
 
-// Se vuelve a generar una vez al día para incluir productos nuevos de la tienda.
-export const revalidate = 86400;
+// Se vuelve a generar cada hora para incluir productos nuevos de la tienda.
+export const revalidate = 3600;
 
-const PAGINAS: { ruta: string; prioridad: number }[] = [
+/**
+ * Fecha del último cambio real del contenido de las páginas fijas.
+ * Actualízala cuando cambies textos de una página (no en cada deploy):
+ * Google deja de confiar en lastmod si cambia sin que cambie el contenido.
+ */
+const ACTUALIZADO = '2026-10-25';
+
+const PAGINAS: { ruta: string; prioridad: number; actualizado?: string }[] = [
   { ruta: '/', prioridad: 1 },
   { ruta: '/especialidades', prioridad: 0.9 },
   { ruta: '/especialidades/ortodoncia', prioridad: 0.9 },
@@ -24,8 +31,9 @@ const PAGINAS: { ruta: string; prioridad: number }[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const paginas: MetadataRoute.Sitemap = PAGINAS.map(({ ruta, prioridad }) => ({
+  const paginas: MetadataRoute.Sitemap = PAGINAS.map(({ ruta, prioridad, actualizado = ACTUALIZADO }) => ({
     url: `${CLINICA.url}${ruta === '/' ? '' : ruta}`,
+    lastModified: actualizado,
     changeFrequency: 'monthly',
     priority: prioridad,
   }));

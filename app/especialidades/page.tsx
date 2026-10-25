@@ -54,7 +54,7 @@ type Especialidad = {
 const especialidades: Especialidad[] = [
   {
     nombre: 'Odontología General',
-    slug: 'odontologia-general',
+    slug: 'odontologia',
     descripcion: 'Controles, diagnóstico, prevención y tratamientos generales para cuidar tu salud bucal.',
     detalle: 'La puerta de entrada para revisar tu salud dental y definir el camino de tratamiento.',
     categoria: 'Odontología',
@@ -293,7 +293,7 @@ export default function EspecialidadesPage() {
                   custom={1}
                   className="max-w-3xl text-[44px] font-black leading-[1.02] tracking-tight md:text-6xl lg:text-[68px]"
                 >
-                  Especialidades
+                  Especialidades{' '}
                   <span className="block text-[#FDB92B]">para cada sonrisa.</span>
                 </motion.h1>
 

@@ -3,7 +3,7 @@ import { metaPagina } from '@/lib/seo';
 
 // Título y descripción que muestra Google para esta página.
 export const metadata = metaPagina({
-  titulo: 'Odontología general en La Pintana · Limpieza y tapaduras',
+  titulo: 'Limpieza dental y tapaduras en La Pintana',
   descripcion:
     'Limpiezas, tapaduras y controles para toda la familia. Evaluación gratis en Av. Venancia Leiva 1871, La Pintana.',
   ruta: '/especialidades/odontologia',
