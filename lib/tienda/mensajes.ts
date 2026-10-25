@@ -36,7 +36,7 @@ function productos(p: Pedido) {
   return p.items.map((i) => `• ${i.cantidad} x ${i.nombre}`).join('\n');
 }
 
-/** "lunes a viernes de 8:30 a 19:30 y sábado de 8:30 a 17:00" */
+/** "lunes a viernes de 8:30 a 19:30 y sábado de 8:30 a 18:00" */
 export function horarioEnTexto() {
   return TIENDA.horario.map((h) => h.charAt(0).toLocaleLowerCase('es-CL') + h.slice(1)).join(' y ');
 }
@@ -50,7 +50,7 @@ function retiroVigente(p: Pedido) {
   return p.fecha_retiro && p.fecha_retiro >= hoyEnChile() ? p.fecha_retiro : null;
 }
 
-/** "Te esperamos el sábado 17 de octubre, de 8:30 a 17:00, en Av. …" */
+/** "Te esperamos el sábado 17 de octubre, de 8:30 a 18:00, en Av. …" */
 function teEsperamos(fecha: string) {
   return `Te esperamos el ${fechaLarga(fecha)}, ${horarioDelDia(fecha)}, en ${TIENDA.direccion}.`;
 }

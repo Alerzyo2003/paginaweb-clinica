@@ -8,7 +8,7 @@ import { metaPagina } from '@/lib/seo';
 export const metadata = metaPagina({
   titulo: 'Contacto y cómo llegar · La Pintana',
   descripcion:
-    'Av. Venancia Leiva 1871, La Pintana. WhatsApp +56 9 6646 7641. Lunes a viernes 8:30–19:30 y sábados 8:30–17:00. Agenda tu evaluación gratis.',
+    'Av. Venancia Leiva 1871, La Pintana. WhatsApp +56 9 6646 7641. Lunes a viernes 8:30–19:30 y sábados 8:30–18:00. Agenda tu evaluación gratis.',
   ruta: '/contacto',
 });
 

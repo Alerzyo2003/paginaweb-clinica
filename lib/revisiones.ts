@@ -11,7 +11,7 @@
 export type Revision = { revisor: string; fecha: string };
 
 export const REVISIONES: Record<string, Revision | null> = {
-  '/especialidades/odontologia': null, //      ej: { revisor: 'Dra. Moira Canales', fecha: '2026-11-03' }
+  '/especialidades/odontologia': null, //      ej: { revisor: 'Dra. Moyra Canales', fecha: '2026-11-03' }
   '/especialidades/ortodoncia': null,
   '/especialidades/implantologia': null,
   '/especialidades/endodoncia': null,

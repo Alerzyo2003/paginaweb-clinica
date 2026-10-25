@@ -33,7 +33,7 @@ export const CLINICA = {
   /** Debe coincidir con Google Maps. */
   horario: {
     semana: { abre: '08:30', cierra: '19:30' },
-    sabado: { abre: '08:30', cierra: '17:00' },
+    sabado: { abre: '08:30', cierra: '18:00' },
   },
 
   /** Perfil de Google (ficha de Google Maps), con nombre "Centro Médico y Dental Dignidad". */
