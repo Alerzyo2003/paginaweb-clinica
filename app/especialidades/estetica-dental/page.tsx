@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -211,7 +212,7 @@ export default function EsteticaDentalPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: "Armonía Facial", desc: "Estudiamos la forma de tu rostro, labios y encías para que tu nueva sonrisa luzca perfecta y completamente natural.", icon: Smile, color: MAGENTA },
+              { title: "Armonía Facial", desc: "Estudiamos la forma de tu rostro, labios y encías para que tu nueva sonrisa se vea armónica y natural.", icon: Smile, color: MAGENTA },
               { title: "Técnicas Conservadoras", desc: "Priorizamos el resguardo del tejido dental sano mediante odontología adhesiva de última generación.", icon: ShieldCheck, color: TEAL },
               { title: "Autoestima y Seguridad", desc: "Sonríe sin complejos en reuniones, fotografías y en tu día a día, proyectando confianza absoluta.", icon: Sparkles, color: AMBER },
             ].map((item, i) => (
@@ -293,7 +294,7 @@ export default function EsteticaDentalPage() {
               className="group relative overflow-hidden rounded-[2rem] border-2 border-slate-100 p-8 transition-colors hover:border-[#B01C48] [transform-style:preserve-3d]"
             >
               <h3 className="text-2xl font-black text-[#071B3A] mb-2">Carillas de Resina o Porcelana</h3>
-              <p className="text-[#B01C48] font-bold text-sm uppercase tracking-wider mb-4">Forma y Color Perfectos</p>
+              <p className="text-[#B01C48] font-bold text-sm uppercase tracking-wider mb-4">Forma y color a tu medida</p>
               <p className="text-slate-600 mb-6">Finas láminas que se adhieren a la parte frontal del diente para corregir fracturas, espacios entre dientes (diastemas) o desgaste severo.</p>
               <ul className="space-y-3 mb-8">
                 <li className="flex gap-2 text-slate-700 font-medium"><CheckCircle2 className="text-[#B01C48] h-5 w-5 shrink-0" /> Diseño de sonrisa a medida</li>
@@ -336,6 +337,9 @@ export default function EsteticaDentalPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="estetica-dental" color="#B01C48" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

@@ -334,7 +334,7 @@ export default function EspecialidadesPage() {
                 <motion.div variants={reveal} custom={4} className="mt-9 grid max-w-xl grid-cols-3 gap-3">
                   {[
                     ['+8', 'Especialidades'],
-                    ['100%', 'Atención cercana'],
+                    ['$0', 'Evaluación'],
                     ['1 lugar', 'Para tu familia'],
                   ].map(([value, label], i) => (
                     <motion.div

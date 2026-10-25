@@ -5,7 +5,8 @@ import Footer from '@/components/footer'; // Importar el Footer
 import CustomCursor from '@/components/CustomCursor'; // <-- Importar el nuevo cursor animado
 import OcultarEnAdmin from '@/components/OcultarEnAdmin'; // Oculta menú, footer y cursor en /admin
 import BarraContactoMovil from '@/components/BarraContactoMovil'; // Llamar / WhatsApp / agendar fijo en celular
-import { CLINICA, clinicaJsonLd, jsonLdSeguro } from '@/lib/clinica';
+import { CLINICA } from '@/lib/clinica';
+import { SpeedInsights } from '@vercel/speed-insights/next'; // Velocidad real de los visitantes (Core Web Vitals) en Vercel
 
 const descripcion =
   'Clínica dental en La Pintana. Evaluación gratis, urgencias dentales, ortodoncia, implantes y odontopediatría. Atendemos de lunes a sábado.'
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
   },
   description: descripcion,
   alternates: { canonical: '/' },
+  // Verificación de Google Search Console: pega el código en la variable GOOGLE_SITE_VERIFICATION de Vercel.
+  ...(process.env.GOOGLE_SITE_VERIFICATION && {
+    verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+  }),
   openGraph: {
     type: 'website',
     locale: 'es_CL',
@@ -39,11 +44,6 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="flex flex-col min-h-screen">
-        {/* Datos estructurados: le dicen a Google que somos una clínica dental, dónde estamos y en qué horario */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdSeguro(clinicaJsonLd()) }}
-        />
 
         {/* Aquí cargas el cursor globalmente (invisible en móviles automáticamente) */}
         <OcultarEnAdmin><CustomCursor /></OcultarEnAdmin>
@@ -60,6 +60,8 @@ export default function RootLayout({
 
         {/* Barra fija de contacto en celular (se oculta sola en /admin y /tienda) */}
         <BarraContactoMovil />
+
+        <SpeedInsights />
 
       </body>
     </html>

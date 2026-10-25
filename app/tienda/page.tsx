@@ -6,6 +6,8 @@ import { linkWhatsApp, TIENDA } from '@/lib/tienda/config';
 import { CATEGORIAS } from '@/lib/tienda/categorias';
 import { obtenerProductos } from '@/lib/tienda/datos';
 import { metaPagina } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { grafo, migasJsonLd } from '@/lib/schema';
 import type { CategoriaId } from '@/lib/tienda/tipos';
 
 // Siempre muestra los precios y el stock más recientes del panel.
@@ -45,6 +47,7 @@ export default async function TiendaPage({ searchParams }: Props) {
 
   return (
     <>
+      <JsonLd data={grafo(migasJsonLd([['Tienda', '/tienda']]))} />
       <Catalogo key={categoriaInicial ?? 'todo'} productos={productos} categoriaInicial={categoriaInicial} />
 
       {/* ===== Información de compra ===== */}

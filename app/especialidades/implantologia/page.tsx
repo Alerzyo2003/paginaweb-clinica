@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -111,7 +112,7 @@ export default function ImplantologiaPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-500">Durabilidad</p>
-                    <p className="text-lg font-black text-[#071B3A]">Para toda la vida</p>
+                    <p className="text-lg font-black text-[#071B3A]">Muchos años con buen cuidado</p>
                   </div>
                 </div>
               </div>
@@ -132,7 +133,7 @@ export default function ImplantologiaPage() {
             {[
               { title: "Masticación Segura", desc: "Vuelve a comer tus alimentos favoritos sin miedo a que tu prótesis se mueva o te cause dolor en las encías.", icon: Activity, color: TEAL },
               { title: "Preserva tu Hueso", desc: "Al reemplazar la raíz del diente, el implante estimula el hueso maxilar, evitando el desgaste y envejecimiento facial prematuro.", icon: ShieldCheck, color: NAVY },
-              { title: "Aspecto 100% Natural", desc: "Las coronas sobre implantes se diseñan a la medida, imitando la textura, forma y color de tus dientes originales.", icon: Smile, color: AMBER },
+              { title: "Aspecto natural", desc: "Las coronas sobre implantes se diseñan a la medida, imitando la textura, forma y color de tus dientes originales.", icon: Smile, color: AMBER },
             ].map((item, i) => (
               <motion.div 
                 key={i}
@@ -181,7 +182,7 @@ export default function ImplantologiaPage() {
               <p className="text-[#0A9BB8] font-bold text-sm uppercase tracking-wider mb-4">Extracciones e Injertos</p>
               <p className="text-slate-600 mb-6">Realizamos extracción de muelas del juicio complejas, regeneración ósea (injertos de hueso) y tratamientos de la articulación temporomandibular (TTM).</p>
               <ul className="space-y-3 mb-8">
-                <li className="flex gap-2 text-slate-700 font-medium"><CheckCircle2 className="text-[#0A9BB8] h-5 w-5 shrink-0" /> Muelas del juicio sin dolor</li>
+                <li className="flex gap-2 text-slate-700 font-medium"><CheckCircle2 className="text-[#0A9BB8] h-5 w-5 shrink-0" /> Extracción de muelas del juicio con anestesia</li>
                 <li className="flex gap-2 text-slate-700 font-medium"><CheckCircle2 className="text-[#0A9BB8] h-5 w-5 shrink-0" /> Preparación para implantes futuros</li>
               </ul>
             </div>
@@ -200,6 +201,9 @@ export default function ImplantologiaPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="implantologia" color="#0A9BB8" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

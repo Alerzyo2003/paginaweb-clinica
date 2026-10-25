@@ -12,6 +12,8 @@ import RevisadoPor from '@/components/RevisadoPor';
 import { CLINICA } from '@/lib/clinica';
 import { dancing, nunito } from '@/lib/fuentes';
 import { metaPagina } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { grafo, migasJsonLd } from '@/lib/schema';
 
 export const metadata = metaPagina({
   titulo: 'Urgencia dental en La Pintana',
@@ -76,6 +78,7 @@ const IR_A_URGENCIA = [
 export default function UrgenciaDentalPage() {
   return (
     <div className={`${nunito.className} bg-white`}>
+      <JsonLd data={grafo(migasJsonLd([['Urgencia dental', '/urgencia-dental']]))} />
       {/* ================= PORTADA ================= */}
       <section className="relative isolate overflow-hidden bg-[#071B3A] text-white">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">

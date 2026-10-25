@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -330,6 +331,9 @@ export default function RehabilitacionOralPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="rehabilitacion-oral" color="#B01C48" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
@@ -108,7 +109,7 @@ export default function OrtodonciaPage() {
       title: 'Ortodoncia Invisible',
       eyebrow: 'Alineadores Transparentes',
       desc: 'La opción más moderna. Son placas transparentes removibles hechas a medida con tecnología 3D. Prácticamente invisibles y muy cómodos.',
-      items: ['100% Estéticos', 'Removibles para comer'],
+      items: ['Transparentes y discretos', 'Removibles para comer'],
       featured: true,
     },
   ];
@@ -429,6 +430,9 @@ export default function OrtodonciaPage() {
           </div>
         </section>
 
+        {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+        <GuiaTratamiento id="ortodoncia" color="#D9930B" />
+
         {/* ================= CTA FINAL ================= */}
         <section className="bg-white px-3 py-6 md:px-6 md:py-10">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0B2350] to-[#071B3A]">
@@ -448,7 +452,7 @@ export default function OrtodonciaPage() {
                 viewport={{ once: true, amount: 0.25 }}
               >
                 <h2 className="text-4xl font-black leading-[1.08] tracking-tight text-white md:text-[50px]">
-                  Inicia tu viaje hacia una sonrisa perfecta
+                  Empieza el camino hacia una sonrisa más ordenada
                 </h2>
                 <p className="mt-6 max-w-lg text-lg font-medium leading-relaxed text-slate-300">
                   Reserva tu hora de evaluación. Nuestros especialistas estudiarán tu caso y te presentarán el plan de tratamiento ideal para ti.

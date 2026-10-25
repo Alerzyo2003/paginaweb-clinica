@@ -10,6 +10,8 @@ import { linkWhatsApp, TIENDA } from '@/lib/tienda/config';
 import { obtenerProducto, obtenerProductos } from '@/lib/tienda/datos';
 import { precio } from '@/lib/tienda/formato';
 import { metaPagina } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { grafo, migasJsonLd, productoJsonLd } from '@/lib/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +52,15 @@ export default async function ProductoPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 pb-28 pt-6 md:px-8 md:pb-20 md:pt-10">
+      <JsonLd
+        data={grafo(
+          productoJsonLd(producto),
+          migasJsonLd([
+            ['Tienda', '/tienda'],
+            [producto.nombre, `/tienda/${producto.slug}`],
+          ]),
+        )}
+      />
       <Link
         href="/tienda"
         className="inline-flex items-center gap-2 rounded-full py-2 pr-3 text-[14.5px] font-bold text-[#0F2950] hover:text-[#07758C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A9BB8]"

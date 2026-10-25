@@ -4,6 +4,8 @@ import ResenasGoogle from '@/components/ResenasGoogle';
 import { AGENDA_HREF, CLINICA } from '@/lib/clinica';
 import { dancing, nunito } from '@/lib/fuentes';
 import { metaPagina } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { grafo, migasJsonLd } from '@/lib/schema';
 
 export const metadata = metaPagina({
   titulo: 'Contacto y cómo llegar · La Pintana',
@@ -25,6 +27,7 @@ const MAPA_EMBED = `https://www.google.com/maps?q=${encodeURIComponent(`Clínica
 export default function ContactoPage() {
   return (
     <div className={`${nunito.className} bg-white`}>
+      <JsonLd data={grafo(migasJsonLd([['Contacto', '/contacto']]))} />
       <section className="relative isolate overflow-hidden bg-[#071B3A] text-white">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -left-40 -top-40 h-[480px] w-[480px] rounded-full bg-[#0A9BB8]/25 blur-3xl" />

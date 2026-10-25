@@ -30,6 +30,8 @@ const PAGINAS: { ruta: string; prioridad: number; actualizado?: string }[] = [
   { ruta: '/equipo', prioridad: 0.7 },
   { ruta: '/nosotros', prioridad: 0.6 },
   { ruta: '/tienda', prioridad: 0.5 },
+  { ruta: '/privacidad', prioridad: 0.2 },
+  { ruta: '/terminos-tienda', prioridad: 0.2 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import { PRECIOS, pesos } from '@/lib/precios';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ import {
   Droplets
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 const mainFont = Nunito({ subsets: ['latin'], display: 'swap' });
 const scriptFont = Dancing_Script({ subsets: ['latin'], display: 'swap' });
@@ -38,24 +40,29 @@ type TreatmentData = {
   fonasaPrice?: number;
   perTooth: boolean;
   hasFonasaBenefit: boolean;
-  icon: any;
+  icon: LucideIcon;
 };
 
-// Datos expandidos cruzados con los aranceles base de la clínica
-const treatments: Record<string, TreatmentData> = {
-  evaluacion: { id: 'evaluacion', name: 'Evaluación', basePrice: 0, perTooth: false, hasFonasaBenefit: false, icon: Stethoscope },
-  limpieza: { id: 'limpieza', name: 'Limpieza', basePrice: 19990, perTooth: false, hasFonasaBenefit: false, icon: Sparkles },
-  caries: { id: 'caries', name: 'Tapaduras (Caries)', basePrice: 28000, perTooth: true, hasFonasaBenefit: false, icon: ShieldCheck },
-  endodoncia: { id: 'endodoncia', name: 'Trat. de conducto', basePrice: 102000, fonasaPrice: 80050, perTooth: true, hasFonasaBenefit: true, icon: Activity },
-  extraccion: { id: 'extraccion', name: 'Extracción', basePrice: 40000, perTooth: true, hasFonasaBenefit: false, icon: Syringe },
-  corona: { id: 'corona', name: 'Corona Dental', basePrice: 55000, perTooth: true, hasFonasaBenefit: false, icon: Star },
-  implante: { id: 'implante', name: 'Implante', basePrice: 139990, perTooth: true, hasFonasaBenefit: false, icon: Bone },
-  protesis: { id: 'protesis', name: 'Prótesis', basePrice: 56650, perTooth: false, hasFonasaBenefit: false, icon: HeartPulse },
-  brackets: { id: 'brackets', name: 'Brackets', basePrice: 145000, perTooth: false, hasFonasaBenefit: false, icon: Smile },
-  blanqueamiento: { id: 'blanqueamiento', name: 'Blanqueamiento', basePrice: 53000, perTooth: false, hasFonasaBenefit: false, icon: Droplets },
-  carillas: { id: 'carillas', name: 'Carillas', basePrice: 67000, perTooth: true, hasFonasaBenefit: false, icon: Sparkles },
-  sellante: { id: 'sellante', name: 'Flúor/Sellante', basePrice: 13000, perTooth: false, hasFonasaBenefit: false, icon: CheckCircle2 },
+// Precios desde lib/precios.ts (el mismo lugar que usan la tabla y las especialidades).
+const ICONOS: Record<string, LucideIcon> = {
+  evaluacion: Stethoscope, limpieza: Sparkles, caries: ShieldCheck, endodoncia: Activity, extraccion: Syringe,
+  corona: Star, implante: Bone, protesis: HeartPulse, brackets: Smile, blanqueamiento: Droplets,
+  carillas: Sparkles, sellante: CheckCircle2,
 };
+const treatments: Record<string, TreatmentData> = Object.fromEntries(
+  PRECIOS.map((p) => [
+    p.id,
+    {
+      id: p.id,
+      name: p.nombre,
+      basePrice: p.desde,
+      fonasaPrice: p.fonasaPAD,
+      perTooth: p.porPieza,
+      hasFonasaBenefit: Boolean(p.fonasaPAD),
+      icon: ICONOS[p.id] ?? Stethoscope,
+    },
+  ]),
+);
 
 function AmberLink({ href, children, className = '' }: { href: string; children: ReactNode; className?: string }) {
   return (
@@ -327,6 +334,55 @@ export default function CalculadoraPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ===== Tabla de precios: visible sin usar la calculadora (y legible para Google) ===== */}
+        <section aria-labelledby="tabla-precios" className="mx-auto mt-20 max-w-[900px] px-4 md:px-0">
+          <h2 id="tabla-precios" className="text-3xl font-black tracking-tight text-[#071B3A] md:text-4xl">
+            Precios de tratamientos dentales en La Pintana
+          </h2>
+          <p className="mt-4 text-[17px] leading-relaxed text-slate-600">
+            Valores particulares de referencia en Clínica Dignidad. La evaluación es gratis y en ella te entregamos el
+            presupuesto exacto para tu caso.
+          </p>
+          <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-slate-200">
+            <table className="w-full text-left text-[15px]">
+              <thead className="bg-[#071B3A] text-white">
+                <tr>
+                  <th scope="col" className="px-5 py-4 font-extrabold">Tratamiento</th>
+                  <th scope="col" className="px-5 py-4 text-right font-extrabold">Desde</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {PRECIOS.map((p) => (
+                  <tr key={p.id}>
+                    <th scope="row" className="px-5 py-3.5 font-bold text-[#071B3A]">
+                      {p.ruta ? (
+                        <Link href={p.ruta} className="hover:text-[#0A9BB8] hover:underline">
+                          {p.nombre}
+                        </Link>
+                      ) : (
+                        p.nombre
+                      )}
+                      {p.porPieza && <span className="ml-1.5 text-[13px] font-medium text-slate-500">(por pieza)</span>}
+                      {p.fonasaPAD && (
+                        <Link href="/fonasa" className="mt-0.5 block text-[13px] font-semibold text-[#3F6212] hover:underline">
+                          Con Bono PAD Fonasa: desde {pesos(p.fonasaPAD)}
+                        </Link>
+                      )}
+                    </th>
+                    <td className="whitespace-nowrap px-5 py-3.5 text-right text-[16px] font-black text-[#071B3A]">
+                      {p.desde === 0 ? 'Gratis' : pesos(p.desde)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-[14px] leading-relaxed text-slate-500">
+            Precios en pesos chilenos, válidos a octubre de 2026. El valor final depende del diagnóstico, el número de
+            piezas y los materiales.
+          </p>
+        </section>
 
       </div>
     </main>

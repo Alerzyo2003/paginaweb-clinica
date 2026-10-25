@@ -145,6 +145,10 @@ export default function Footer() {
         <div className="mt-10 pt-5 border-t border-blue-200/60 flex flex-col lg:flex-row justify-between items-center gap-4">
           <div className="text-[#475569] text-[12px] font-medium text-center lg:text-left">
             © 2026 <strong className="text-[#0f2950]">Clínica Dignidad</strong>. Todos los derechos reservados.
+            <span className="mx-2 text-blue-300">·</span>
+            <Link href="/privacidad" className="hover:text-blue-600">Privacidad</Link>
+            <span className="mx-2 text-blue-300">·</span>
+            <Link href="/terminos-tienda" className="hover:text-blue-600">Términos de la tienda</Link>
           </div>
           
           

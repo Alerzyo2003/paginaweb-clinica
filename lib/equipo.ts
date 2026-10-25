@@ -62,7 +62,7 @@ export const EQUIPO: Miembro[] = [
   {
     nombre: 'Dra. Natalia Álvarez',
     rol: 'Endodoncista',
-    descripcion: 'Me especializo en conservar tus dientes naturales con procedimientos minuciosos y un control absoluto del dolor desde el primer momento.',
+    descripcion: 'Me especializo en conservar tus dientes naturales con procedimientos minuciosos y un buen manejo del dolor desde el primer momento.',
     area: 'endodoncia',
     foto: '/equipo/natalia.png',
     registroSIS: '759389',

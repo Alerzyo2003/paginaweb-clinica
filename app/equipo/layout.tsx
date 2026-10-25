@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { metaPagina } from '@/lib/seo';
 import { CLINICA, jsonLdSeguro } from '@/lib/clinica';
 import { EQUIPO } from '@/lib/equipo';
+import { migasJsonLd } from '@/lib/schema';
 
 // Título y descripción que muestra Google para esta página.
 export const metadata = metaPagina({
@@ -15,7 +16,7 @@ export const metadata = metaPagina({
 function equipoJsonLd() {
   return {
     '@context': 'https://schema.org',
-    '@graph': EQUIPO.map((m) => {
+    '@graph': [migasJsonLd([['Equipo', '/equipo']]), ...EQUIPO.map((m) => {
       const prefijo = m.nombre.match(/^(Dra?\.)\s+/)?.[1];
       return {
         '@type': 'Person',
@@ -33,7 +34,7 @@ function equipoJsonLd() {
           },
         }),
       };
-    }),
+    })],
   };
 }
 

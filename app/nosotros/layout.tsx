@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { metaPagina } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { grafo, migasJsonLd } from '@/lib/schema';
 
 // Título y descripción que muestra Google para esta página.
 export const metadata = metaPagina({
@@ -10,5 +12,10 @@ export const metadata = metaPagina({
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      <JsonLd data={grafo(migasJsonLd([['Nosotros', '/nosotros']]))} />
+      {children}
+    </>
+  );
 }

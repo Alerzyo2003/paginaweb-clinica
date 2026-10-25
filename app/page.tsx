@@ -2,6 +2,8 @@
 
 import { AGENDA_HREF } from '@/lib/clinica';
 import ResenasGoogle from '@/components/ResenasGoogle';
+import JsonLd from '@/components/JsonLd';
+import { clinicaJsonLd } from '@/lib/clinica';
 import { Fragment, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -506,6 +508,8 @@ export default function Home() {
   return (
     <MotionConfig reducedMotion="user">
       <main ref={containerRef} className={`${mainFont.className} flex min-h-screen flex-col overflow-x-hidden bg-white`}>
+        {/* Ficha completa de la clínica para Google (solo en el inicio; el resto la nombra por @id) */}
+        <JsonLd data={clinicaJsonLd()} />
         {/* ================= HERO ================= */}
         <section id="inicio" className="relative isolate overflow-hidden bg-[#071B3A] text-white">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">

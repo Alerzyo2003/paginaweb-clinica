@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -167,7 +168,7 @@ export default function EndodonciaPage() {
                 {/* Puedes usar una foto de un doctor trabajando o un paciente aliviado */}
                 <Image 
                   src="/especialidades/endodoncia.png" 
-                  alt="Tratamiento de endodoncia indoloro"
+                  alt="Tratamiento de endodoncia con anestesia local"
                   fill
                   className="object-cover"
                 />
@@ -192,7 +193,7 @@ export default function EndodonciaPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-500">Procedimiento</p>
-                    <p className="text-lg font-black text-[#071B3A]">100% Sin Dolor</p>
+                    <p className="text-lg font-black text-[#071B3A]">Con anestesia local</p>
                   </div>
                 </div>
               </motion.div>
@@ -206,7 +207,7 @@ export default function EndodonciaPage() {
         <div className="max-w-[1300px] mx-auto px-4 md:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black text-[#071B3A] mb-4">¿Por qué es vital una Endodoncia a tiempo?</h2>
-            <p className="text-slate-600 text-lg">Cuando las caries avanzan o hay un traumatismo, el nervio se infecta. La endodoncia es la única forma de evitar la extracción.</p>
+            <p className="text-slate-600 text-lg">Cuando las caries avanzan o hay un traumatismo, el nervio se infecta. Tratarlo a tiempo con una endodoncia permite, en la mayoría de los casos, conservar el diente en vez de extraerlo.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -336,6 +337,9 @@ export default function EndodonciaPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="endodoncia" color="#6B9A2A" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

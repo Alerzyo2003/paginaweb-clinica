@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -201,7 +202,7 @@ export default function OdontopediatriaPage() {
         <div className="max-w-[1300px] mx-auto px-4 md:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black text-[#071B3A] mb-4">La importancia de empezar temprano</h2>
-            <p className="text-slate-600 text-lg">Una buena experiencia dental en la niñez garantiza adultos sin miedo al dentista y con una dentadura sana para toda la vida.</p>
+            <p className="text-slate-600 text-lg">Una buena experiencia dental en la niñez ayuda a que crezcan sin miedo al dentista y con hábitos que cuidan sus dientes de adultos.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -331,6 +332,9 @@ export default function OdontopediatriaPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="odontopediatria" color="#22B3CF" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

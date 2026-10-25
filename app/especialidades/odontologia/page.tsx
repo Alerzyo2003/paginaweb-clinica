@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import GuiaTratamiento from '@/components/GuiaTratamiento';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'framer-motion';
@@ -246,7 +247,7 @@ export default function OdontologiaGeneralPage() {
           <div className="mb-16 md:flex md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-3xl md:text-4xl font-black text-[#071B3A] mb-4">Soluciones para tu salud bucal</h2>
-              <p className="text-slate-600 text-lg">Ofrecemos una amplia gama de procedimientos dentales utilizando materiales de primera categoría y protocolos actualizados para garantizar resultados excelentes.</p>
+              <p className="text-slate-600 text-lg">Ofrecemos una amplia gama de procedimientos dentales utilizando materiales de primera categoría y protocolos actualizados para cuidar la calidad de cada tratamiento.</p>
             </div>
           </div>
 
@@ -331,6 +332,9 @@ export default function OdontologiaGeneralPage() {
           </div>
         </div>
       </section>
+
+      {/* ================= GUÍA COMPLETA (lib/guias.ts) ================= */}
+      <GuiaTratamiento id="odontologia" color="#0A9BB8" />
 
       {/* ================= CTA FINAL ================= */}
       <section className="bg-white px-3 py-6 md:px-6 md:py-10">

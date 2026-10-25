@@ -76,7 +76,7 @@ const cifras: { valor: string; label: string; color: string; icon: LucideIcon }[
   { valor: '$0', label: 'Evaluación integral', color: AMBER, icon: CalendarCheck },
   { valor: '12+', label: 'Especialidades médicas', color: TEAL_LIGHT, icon: Stethoscope },
   { valor: '16', label: 'Profesionales en clínica', color: GREEN_LIGHT, icon: Users },
-  { valor: '100%', label: 'Satisfacción del paciente', color: MAGENTA_LIGHT, icon: Heart },
+  { valor: 'L–S', label: 'Atención de lunes a sábado', color: MAGENTA_LIGHT, icon: Heart },
 ];
 
 const pilares: { titulo: string; texto: string; color: string; icon: LucideIcon }[] = [
