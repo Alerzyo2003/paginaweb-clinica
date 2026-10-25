@@ -230,6 +230,10 @@ export default function FonasaPage() {
             {pesos(PAD_ENDODONCIA[2].copago)} según el número de raíces del diente. Incluye el diagnóstico, las
             radiografías, el tratamiento, la restauración con resina y el control de complicaciones durante un año.
           </p>
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#8DBF3F]/15 px-4 py-2 text-[15px] font-bold text-[#3F6212]">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            Clínica Dignidad tiene convenio con Fonasa para el Bono PAD de endodoncia.
+          </p>
 
           <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-slate-200 shadow-sm">
             <table className="w-full text-left text-[15px]">

@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENDA_HREF } from '@/lib/clinica';
+import ResenasGoogle from '@/components/ResenasGoogle';
 import { Fragment, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -1112,6 +1113,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ================= RESEÑAS ================= */}
+        <ResenasGoogle className="pt-16 md:pt-24" />
 
         {/* ================= PREGUNTAS FRECUENTES ================= */}
         <section id="preguntas" className="relative w-full scroll-mt-24 overflow-hidden py-24 md:py-32">

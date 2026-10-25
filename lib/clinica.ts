@@ -36,6 +36,15 @@ export const CLINICA = {
     sabado: { abre: '08:30', cierra: '17:00' },
   },
 
+  /** Perfil de Google (ficha de Google Maps), con nombre "Centro Médico y Dental Dignidad". */
+  google: {
+    perfilUrl: 'https://maps.google.com/?cid=7797077430385595033',
+    placeId: 'ChIJHxVmLczbYpYROZt2j0LihUY',
+    resenasUrl: 'https://search.google.com/local/reviews?placeid=ChIJHxVmLczbYpYROZt2j0LihUY',
+    /** Link directo para que un paciente deje su reseña (sirve para mandarlo por WhatsApp). */
+    escribirResenaUrl: 'https://search.google.com/local/writereview?placeid=ChIJHxVmLczbYpYROZt2j0LihUY',
+  },
+
   redes: {
     instagram: 'https://www.instagram.com/clinicadignidad/',
     facebook: 'https://www.facebook.com/clinicadignidad',
@@ -52,6 +61,8 @@ export function clinicaJsonLd() {
     '@type': 'Dentist',
     '@id': `${CLINICA.url}/#clinica`,
     name: CLINICA.nombre,
+    // Nombre con el que aparece la ficha en Google: ayuda a que Google una el sitio con esa ficha.
+    alternateName: 'Centro Médico y Dental Dignidad',
     slogan: CLINICA.eslogan,
     url: CLINICA.url,
     logo: `${CLINICA.url}/logo-dignidad.png`,
@@ -90,7 +101,7 @@ export function clinicaJsonLd() {
       target: CLINICA.agendaUrl,
       name: 'Agendar evaluación gratis',
     },
-    sameAs: [CLINICA.redes.instagram, CLINICA.redes.facebook],
+    sameAs: [CLINICA.google.perfilUrl, CLINICA.redes.instagram, CLINICA.redes.facebook],
   };
 }
 

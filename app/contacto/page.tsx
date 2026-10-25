@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CalendarCheck, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, Siren } from 'lucide-react';
+import ResenasGoogle from '@/components/ResenasGoogle';
 import { AGENDA_HREF, CLINICA } from '@/lib/clinica';
 import { dancing, nunito } from '@/lib/fuentes';
 import { metaPagina } from '@/lib/seo';
@@ -69,7 +70,7 @@ export default function ContactoPage() {
               {direccion.comuna}, {direccion.region}
               <br />
               <a
-                href={CLINICA.mapsUrl}
+                href={CLINICA.google.perfilUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`mt-1 inline-flex items-center gap-1.5 font-bold text-[#0A9BB8] hover:underline ${focusLight}`}
@@ -142,8 +143,9 @@ export default function ContactoPage() {
             />
           </div>
         </div>
-        <p className={`${dancing.className} mt-14 text-center text-3xl text-[#0A9BB8]`}>{CLINICA.eslogan}</p>
       </section>
+      <ResenasGoogle className="pb-6" />
+      <p className={`${dancing.className} pb-14 pt-8 text-center text-3xl text-[#0A9BB8]`}>{CLINICA.eslogan}</p>
     </div>
   );
 }
