@@ -1,5 +1,6 @@
 'use client';
 
+import { EQUIPO as equipo, VERIFICAR_REGISTRO_URL, type AreaId, type Miembro } from '@/lib/equipo';
 import { AGENDA_HREF } from '@/lib/clinica';
 import { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
@@ -58,15 +59,6 @@ const focusLight =
 /* ------------------------------------------------------------------ */
 /*  Áreas y equipo                                                     */
 /* ------------------------------------------------------------------ */
-type AreaId = 'cirugia' | 'ortodoncia' | 'endodoncia' | 'rehabilitacion' | 'general' | 'podologia';
-
-type Miembro = {
-  nombre: string;
-  rol: string;
-  descripcion: string;
-  area: AreaId;
-  foto?: string;
-};
 
 const AREAS: Record<AreaId, { titulo: string; corto: string; color: string; icon: LucideIcon }> = {
   cirugia: { titulo: 'Cirugía maxilofacial e implantes', corto: 'Cirugía e implantes', color: TEAL, icon: ShieldCheck },
@@ -77,120 +69,6 @@ const AREAS: Record<AreaId, { titulo: string; corto: string; color: string; icon
   podologia: { titulo: 'Podología clínica', corto: 'Podología', color: MAGENTA, icon: Footprints },
 };
 
-const equipo: Miembro[] = [
-  {
-    nombre: 'Dr. Ariel Zivov',
-    rol: 'Cirujano traumatólogo bucomaxilofacial',
-    descripcion: 'Resuelve cirugías complejas y traumatismos maxilofaciales con un protocolo seguro en cada etapa.',
-    area: 'cirugia',
-    foto: '/equipo/ariel-zivov.png',
-  },
-  {
-    nombre: 'Dra. Nathalia Peñaloza',
-    rol: 'Cirujana implantóloga bucomaxilofacial · TTM',
-    descripcion: 'Implantes y trastornos de la articulación, para devolver función y estética a tu mordida.',
-    area: 'cirugia',
-    foto: '/equipo/nathalia-penaloza.png',
-  },
-  {
-    nombre: 'Dr. Jaime Salazar',
-    rol: 'Cirujano implantólogo bucomaxilofacial',
-    descripcion: 'Rehabilita sonrisas con implantes, cuidando la salud del hueso y la encía que los sostiene.',
-    area: 'cirugia',
-    foto: '/equipo/jaime-salazar.png',
-  },
-  {
-    nombre: 'Dr. Diego Torrijos',
-    rol: 'Cirujano implantólogo bucomaxilofacial',
-    descripcion: 'Combina planificación quirúrgica digital con un trato tranquilo, paso a paso.',
-    area: 'cirugia',
-    foto: '/equipo/diego-torrijos.png',
-  },
-  {
-    nombre: 'Dra. Natalia Álvarez',
-    rol: 'Endodoncista',
-    descripcion: 'Me especializo en conservar tus dientes naturales con procedimientos minuciosos y un control absoluto del dolor desde el primer momento.',
-    area: 'endodoncia',
-    foto: '/equipo/natalia.png',
-  },
-  {
-    nombre: 'Dr. Víctor Morgado',
-    rol: 'Ortodoncista y odontopediatra',
-    descripcion: 'Acompaña el crecimiento dental de niñas y niños, y corrige la mordida a tiempo.',
-    area: 'ortodoncia',
-    foto: '/equipo/victor-morgado.png',
-  },
-  {
-    nombre: 'Dra. Valeska Moraga',
-    rol: 'Ortodoncista',
-    descripcion: 'Trabaja con brackets y alineadores discretos para ordenar la sonrisa a cualquier edad.',
-    area: 'ortodoncia',
-    foto: '/equipo/valeska-moraga.png',
-  },
-  {
-    nombre: 'Dra. Antonia Urbina',
-    rol: 'Endodoncista',
-    descripcion: 'Salva piezas dentales con tratamientos precisos y control del dolor en cada sesión.',
-    area: 'endodoncia',
-    foto: '/equipo/antonia-urbina.png',
-  },
-  {
-    nombre: 'Dr. Diego Provoste',
-    rol: 'Rehabilitación oral',
-    descripcion: 'Devuelve función y estética mediante prótesis y tratamientos integrales.',
-    area: 'rehabilitacion',
-    foto: '/equipo/diego-provoste.png',
-  },
-  {
-    nombre: 'Dr. Pedro Chacón',
-    rol: 'Rehabilitación adhesiva estética',
-    descripcion: 'Restaura la forma natural del diente con técnicas mínimamente invasivas.',
-    area: 'rehabilitacion',
-    foto: '/equipo/pedro-chacon.png',
-  },
-  {
-    nombre: 'Dr. Paulo Cerda',
-    rol: 'Rehabilitación oral',
-    descripcion: 'Planifica cada rehabilitación pensando en la mordida completa, no solo en una pieza.',
-    area: 'rehabilitacion',
-    foto: '/equipo/paulo-cerda.png',
-  },
-  {
-    nombre: 'Dra. Moira Canales',
-    rol: 'Cirujana dentista',
-    descripcion: 'Diagnóstico, prevención y tratamiento general con un trato muy cercano.',
-    area: 'general',
-    foto: '/equipo/moira-canales.png',
-  },
-  {
-    nombre: 'Dra. Tamara Gómez',
-    rol: 'Cirujana dentista',
-    descripcion: 'Enfocada en prevención: controles, higiene y detección temprana de caries.',
-    area: 'general',
-    foto: '/equipo/tamara-gomez.png',
-  },
-  {
-    nombre: 'Dr. Patricio Yavar',
-    rol: 'Cirujano dentista',
-    descripcion: 'Atención integral, pensada para quienes llegan con miedo al dentista.',
-    area: 'general',
-    foto: '/equipo/patricio-yavar.png',
-  },
-  {
-    nombre: 'Dr. Isaac Reyes',
-    rol: 'Cirujano dentista',
-    descripcion: 'Soluciones eficaces explicadas paso a paso, con seguimiento después del alta.',
-    area: 'general',
-    foto: '/equipo/isaac-reyes.png',
-  },
-  {
-    nombre: 'Saira Marín',
-    rol: 'Podóloga clínica',
-    descripcion: 'Trata uñas, callosidades y afecciones del pie para que cada paso sea cómodo.',
-    area: 'podologia',
-    foto: '/equipo/saira-marin.png',
-  },
-];
 
 /* ------------------------------------------------------------------ */
 /*  Utilidades                                                         */
@@ -557,6 +435,37 @@ function TarjetaProfesional({ m, index }: { m: Miembro; index: number }) {
             >
               {m.descripcion}
             </motion.p>
+
+            {(m.registroSIS || m.universidad || m.especialidadFormacion) && (
+              <dl className="mt-4 space-y-1 border-t border-slate-100 pt-3 text-[12.5px] leading-snug text-slate-500">
+                {m.universidad && (
+                  <div>
+                    <dt className="sr-only">Título</dt>
+                    <dd>{m.universidad}</dd>
+                  </div>
+                )}
+                {m.especialidadFormacion && (
+                  <div>
+                    <dt className="sr-only">Especialidad</dt>
+                    <dd>{m.especialidadFormacion}</dd>
+                  </div>
+                )}
+                {m.registroSIS && (
+                  <div>
+                    <dt className="inline">Registro Superintendencia de Salud: </dt>
+                    <dd className="inline font-bold text-slate-700">N° {m.registroSIS}</dd>{' '}
+                    <a
+                      href={VERIFICAR_REGISTRO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`font-bold text-[#0A9BB8] underline-offset-2 hover:underline ${focusLight}`}
+                    >
+                      Verificar
+                    </a>
+                  </div>
+                )}
+              </dl>
+            )}
 
             <motion.div
               className="mt-6"

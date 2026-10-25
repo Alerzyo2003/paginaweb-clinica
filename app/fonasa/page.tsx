@@ -32,6 +32,27 @@ const SOFT = '#F6F9FD';
 const focusDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FDB92B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071B3A]';
 
+/**
+ * Copagos del Bono PAD dental (endodoncia) que informa Fonasa.
+ * Revisar una vez al año: Fonasa los actualiza. Última revisión: octubre 2026.
+ */
+const PAD_ENDODONCIA = [
+  { tipo: 'Endodoncia unirradicular', piezas: 'Dientes de una raíz (generalmente incisivos y caninos)', copago: 80050 },
+  { tipo: 'Endodoncia birradicular', piezas: 'Dientes de dos raíces (generalmente premolares)', copago: 100370 },
+  { tipo: 'Endodoncia multirradicular', piezas: 'Dientes de tres o más raíces (molares)', copago: 110520 },
+];
+const PAD_REVISADO = 'octubre de 2026';
+
+const pasosPad = [
+  { titulo: 'Evaluación en la clínica', texto: 'El dentista revisa el diente, toma radiografías y confirma si tu caso cumple los criterios del PAD.' },
+  { titulo: 'Te entregamos la orden', texto: 'Con el diagnóstico, la pieza a tratar y el código del tratamiento.' },
+  { titulo: 'Compras el bono en Fonasa', texto: 'En una sucursal o en línea. Ahí pagas el copago; Fonasa ofrece préstamo médico para parte de ese monto.' },
+  { titulo: 'Traes el bono y empezamos', texto: 'El bono se entrega antes de iniciar el tratamiento. No se cobra nada adicional por lo que cubre el PAD.' },
+];
+
+// Formato fijo (sin toLocaleString) para que servidor y navegador muestren lo mismo.
+const pesos = (n: number) => `$${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+
 const sintomas = [
   { icon: Zap, title: '¿Tienes dolor al masticar?', color: TEAL_LIGHT },
   { icon: ThermometerSnowflake, title: '¿Sensibilidad al frío o calor?', color: MAGENTA_LIGHT },
@@ -194,6 +215,75 @@ export default function FonasaPage() {
               </div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* ================= BONO PAD: CUÁNTO SE PAGA ================= */}
+      <section id="bono-pad" className="bg-white px-4 pt-20 md:px-8 md:pt-28">
+        <div className="mx-auto max-w-[1000px]">
+          <h2 className="text-3xl font-black tracking-tight text-[#071B3A] md:text-5xl">
+            ¿Cuánto cuesta un tratamiento de conducto con Bono PAD?
+          </h2>
+          <p className="mt-5 max-w-3xl text-[17px] font-medium leading-relaxed text-slate-600">
+            El Bono PAD (Pago Asociado a Diagnóstico) es un precio fijo que Fonasa define para el tratamiento completo. Para
+            personas de 12 a 34 años en los tramos B, C o D, el copago va de {pesos(PAD_ENDODONCIA[0].copago)} a{' '}
+            {pesos(PAD_ENDODONCIA[2].copago)} según el número de raíces del diente. Incluye el diagnóstico, las
+            radiografías, el tratamiento, la restauración con resina y el control de complicaciones durante un año.
+          </p>
+
+          <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-slate-200 shadow-sm">
+            <table className="w-full text-left text-[15px]">
+              <caption className="sr-only">Copago del Bono PAD dental para endodoncia</caption>
+              <thead className="bg-[#071B3A] text-white">
+                <tr>
+                  <th scope="col" className="px-5 py-4 font-extrabold">Tratamiento</th>
+                  <th scope="col" className="hidden px-5 py-4 font-extrabold sm:table-cell">Qué dientes</th>
+                  <th scope="col" className="px-5 py-4 text-right font-extrabold">Copago</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {PAD_ENDODONCIA.map((f) => (
+                  <tr key={f.tipo}>
+                    <th scope="row" className="px-5 py-4 font-bold text-[#071B3A]">
+                      {f.tipo}
+                      <span className="mt-1 block text-[13px] font-medium text-slate-500 sm:hidden">{f.piezas}</span>
+                    </th>
+                    <td className="hidden px-5 py-4 text-slate-600 sm:table-cell">{f.piezas}</td>
+                    <td className="whitespace-nowrap px-5 py-4 text-right text-lg font-black text-[#071B3A]">
+                      {pesos(f.copago)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <ul className="mt-6 space-y-2 text-[14px] leading-relaxed text-slate-500">
+            <li>
+              Valores informados por Fonasa, revisados en {PAD_REVISADO}. Fonasa puede actualizarlos; el monto final se
+              confirma al comprar el bono.
+            </li>
+            <li>Se puede usar un bono de cada tipo por persona al año. La endodoncia de molares la realiza un especialista.</li>
+            <li>Si no cumples la edad o el tramo, igual puedes tratarte: te entregamos el presupuesto particular en la evaluación.</li>
+          </ul>
+
+          <h3 className="mt-16 text-2xl font-black text-[#071B3A] md:text-3xl">Cómo usar el Bono PAD, paso a paso</h3>
+          <ol className="mt-8 grid gap-5 sm:grid-cols-2">
+            {pasosPad.map((paso, i) => (
+              <li key={paso.titulo} className="flex gap-4 rounded-[1.25rem] bg-[#F6F9FD] p-6">
+                <span
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg font-black text-[#071B3A]"
+                  style={{ backgroundColor: AMBER }}
+                >
+                  {i + 1}
+                </span>
+                <div>
+                  <p className="font-extrabold text-[#071B3A]">{paso.titulo}</p>
+                  <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{paso.texto}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 

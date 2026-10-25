@@ -11,8 +11,6 @@ import {
   AnimatePresence,
   MotionConfig,
   motion,
-  useMotionValueEvent,
-  useScroll,
 } from 'framer-motion';
 import { Nunito, Dancing_Script } from 'next/font/google';
 import {
@@ -342,47 +340,6 @@ function AmberLink({
         </Link>
       )}
     </motion.div>
-  );
-}
-
-function MobileCta() {
-  const { scrollY } = useScroll();
-  const [show, setShow] = useState(false);
-  useMotionValueEvent(scrollY, 'change', (v) => setShow(v > 520));
-
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-          className="fixed inset-x-0 bottom-0 z-40 md:hidden"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        >
-          <div className="mx-3 mb-3 flex gap-2 rounded-full border border-white/10 bg-[#071B3A]/90 p-2 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <a
-              href={PHONE_HREF}
-              aria-label={`Llamar al ${PHONE_LABEL}`}
-              className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-white/15 text-[#FDB92B] ${focusDark}`}
-            >
-              <Phone className="h-5 w-5" aria-hidden="true" />
-            </a>
-            <a
-              href={AGENDA_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex flex-1 items-center justify-center gap-2 rounded-full text-[15px] font-extrabold text-[#071B3A] ${focusDark}`}
-              style={{ backgroundColor: AMBER }}
-            >
-              <CalendarCheck className="h-5 w-5" aria-hidden="true" />
-              Agenda tu evaluación
-            </a>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 }
 
@@ -1187,7 +1144,6 @@ export default function Home() {
           </div>
         </section>
 
-        <MobileCta />
       </main>
     </MotionConfig>
   );

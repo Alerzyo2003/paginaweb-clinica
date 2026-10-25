@@ -55,6 +55,7 @@ export default function Footer() {
                 { label: "Equipo", href: "/equipo", icon: <UsersIcon className="w-5 h-5 text-blue-500" /> },
                 { label: "Conócenos", href: "/nosotros", icon: <ToothIcon className="w-5 h-5 text-blue-500" /> },
                 { label: "Especialidades", href: "/especialidades", icon: <ShieldIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Contacto y cómo llegar", href: "/contacto", icon: <MapPinIcon className="w-5 h-5 text-blue-500" /> },
               ].map((item, i) => (
                 <li key={i}>
                   <Link href={item.href} className="flex items-center gap-2.5 group">
@@ -75,6 +76,8 @@ export default function Footer() {
             <h3 className="text-[17px] font-black text-[#0f2950] mb-4">Te Ayudamos</h3>
             <ul className="space-y-3">
               {[
+                { label: "Urgencia dental", href: "/urgencia-dental", isExternal: false, icon: <ShieldIcon className="w-5 h-5 text-blue-500" /> },
+                { label: "Bono PAD Fonasa", href: "/fonasa", isExternal: false, icon: <ToothIcon className="w-5 h-5 text-blue-500" /> },
                 { label: "Convenios", href: "/convenios", isExternal: false, icon: <HandshakeIcon className="w-5 h-5 text-blue-500" /> },
                 { label: "Agendar Hora", href: AGENDA_HREF, isExternal: true, icon: <CalendarIcon className="w-5 h-5 text-blue-500" /> },
                 { label: "Tienda", href: "/tienda", isExternal: false, icon: <BagIcon className="w-5 h-5 text-blue-500" /> },

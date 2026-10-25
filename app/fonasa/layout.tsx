@@ -1,14 +1,20 @@
 import type { ReactNode } from 'react';
 import { metaPagina } from '@/lib/seo';
+import RevisadoPor from '@/components/RevisadoPor';
 
 // Título y descripción que muestra Google para esta página.
 export const metadata = metaPagina({
   titulo: 'Tratamiento de conducto Fonasa La Pintana',
   descripcion:
-    'Si tienes entre 12 y 34 años y eres Fonasa B, C o D, tu tratamiento de conducto puede tener cobertura. Revisa los requisitos y agenda tu evaluación.',
+    'Bono PAD Fonasa para tratamiento de conducto: copago desde $80.050 si tienes 12 a 34 años y eres tramo B, C o D. Requisitos y pasos en La Pintana.',
   ruta: '/fonasa',
 });
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      {children}
+      <RevisadoPor ruta="/fonasa" />
+    </>
+  );
 }

@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'; // Importar el Navbar
 import Footer from '@/components/footer'; // Importar el Footer
 import CustomCursor from '@/components/CustomCursor'; // <-- Importar el nuevo cursor animado
 import OcultarEnAdmin from '@/components/OcultarEnAdmin'; // Oculta menú, footer y cursor en /admin
+import BarraContactoMovil from '@/components/BarraContactoMovil'; // Llamar / WhatsApp / agendar fijo en celular
 import { CLINICA, clinicaJsonLd, jsonLdSeguro } from '@/lib/clinica';
 
 const descripcion =
@@ -56,6 +57,9 @@ export default function RootLayout({
 
         {/* Aquí cargas el Footer globalmente */}
         <OcultarEnAdmin><Footer /></OcultarEnAdmin>
+
+        {/* Barra fija de contacto en celular (se oculta sola en /admin y /tienda) */}
+        <BarraContactoMovil />
 
       </body>
     </html>
