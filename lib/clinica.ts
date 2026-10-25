@@ -15,6 +15,9 @@ export const CLINICA = {
   telefono: '+56966467641',
   telefonoVisible: '+56 9 6646 7641',
   whatsappUrl: 'https://wa.me/56966467641',
+  /** Línea secundaria. El número principal (arriba) es el que va en Google y en los botones. */
+  telefonoSecundario: '+56994464662',
+  telefonoSecundarioVisible: '+56 9 9446 4662',
   email: 'recepcion@clinicadignidad.com',
 
   direccion: {

@@ -118,6 +118,8 @@ export default function Footer() {
                 <PhoneIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <span className="text-[#334155] text-[14px] font-medium">
                   <a href={`tel:${CLINICA.telefono}`} className="hover:text-blue-600">{CLINICA.telefonoVisible}</a>
+                  <span className="text-blue-300 mx-2">|</span>
+                  <a href={`tel:${CLINICA.telefonoSecundario}`} className="hover:text-blue-600">{CLINICA.telefonoSecundarioVisible}</a>
                 </span>
               </li>
             </ul>
