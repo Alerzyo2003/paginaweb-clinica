@@ -84,6 +84,14 @@ export const EQUIPO: Miembro[] = [
     registroSIS: '611655',
   },
   {
+    nombre: 'Dra. Bárbara Leal',
+    rol: 'Ortodoncista',
+    descripcion: 'Planifica cada ortodoncia según tu caso, para alinear tus dientes y lograr una mordida cómoda.',
+    area: 'ortodoncia',
+    foto: '/equipo/barbaraleal.png',
+    registroSIS: '510247',
+  },
+  {
     nombre: 'Dra. Antonia Urbina',
     rol: 'Endodoncista',
     descripcion: 'Salva piezas dentales con tratamientos precisos y control del dolor en cada sesión.',

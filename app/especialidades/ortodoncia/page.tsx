@@ -507,7 +507,7 @@ export default function OrtodonciaPage() {
 
                 <p className="mt-5 flex items-center gap-2 text-[13px] font-semibold text-slate-500">
                   <HeartPulse className="h-4 w-4 flex-shrink-0" style={{ color: TEAL }} />
-                  Nuestros ortodoncistas Víctor Morgado y Valeska Moraga te esperan.
+                  Nuestros ortodoncistas Víctor Morgado, Valeska Moraga y Bárbara Leal te esperan.
                 </p>
               </motion.div>
             </div>
