@@ -5,6 +5,7 @@ import Footer from '@/components/footer'; // Importar el Footer
 import CustomCursor from '@/components/CustomCursor'; // <-- Importar el nuevo cursor animado
 import OcultarEnAdmin from '@/components/OcultarEnAdmin'; // Oculta menú, footer y cursor en /admin
 import BarraContactoMovil from '@/components/BarraContactoMovil'; // Llamar / WhatsApp / agendar fijo en celular
+import MetaPixel from '@/components/MetaPixel'; // Meta Pixel (no se carga en /admin)
 import { CLINICA, clinicaJsonLd, jsonLdSeguro } from '@/lib/clinica';
 
 const descripcion =
@@ -44,6 +45,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdSeguro(clinicaJsonLd()) }}
         />
+
+        <MetaPixel />
 
         {/* Aquí cargas el cursor globalmente (invisible en móviles automáticamente) */}
         <OcultarEnAdmin><CustomCursor /></OcultarEnAdmin>
